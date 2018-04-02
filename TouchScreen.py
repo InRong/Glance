@@ -47,7 +47,6 @@ class DataLabel(Label):
 
 class PIRImage(Image):
 	def update(self, dt):
-#		if motion_value:		
 		if main_application.display_text[12]=="on":		
 			self.opacity = 1.0
 		else:
@@ -137,7 +136,6 @@ class MainScreen(Screen):
 		data_label[6] = DataLabel(id="6", font_size='22pt', pos_hint={'x':-0.28, 'y':-0.18})
     		data_label[6].color = [1.0,1.0,1.0,1.0]
 		Clock.schedule_interval(data_label[6].update, 1)
-
 
 		data_label[7] = DataLabel(id="7", font_size='36pt',  pos_hint={'x':0.21, 'y':0.19})
    		data_label[7].color = [0,1.0,0,1.0]
@@ -269,7 +267,7 @@ class MyApp(App):
 		self.main_screen = MainScreen(name='main_screen')
 		self.my_screenmanager.add_widget(self.main_screen)
 
-		self.start_mosquitto()
+		self.start_mosquito()
 
 		self.started = True
 
@@ -288,7 +286,7 @@ class MyApp(App):
 	        except Exception as e:
         	        app_log.exception('Exception: %s', e)
 
-	def start_mosquitto(self):
+	def start_mosquito(self):
 		try:
 			self.mos_client = mqtt.Client()
 			self.mos_client.on_connect = self.on_connect
@@ -615,21 +613,27 @@ class MyApp(App):
 	        except Exception as e:
         	        app_log.exception('Exception: %s', e)
 
-
+	#Switch the screen on or off.
 	def set_screen(self,desired_state):
-	        f = open("/sys/class/backlight/rpi_backlight/bl_power","w")
-        	if desired_state:
-                	f.write("0")
-	        else:
-        	        f.write("1")
-	        f.close()
+	        try:
+			f = open("/sys/class/backlight/rpi_backlight/bl_power","w")
+        		if desired_state:
+                		f.write("0")
+		        else:
+        		        f.write("1")
+		        f.close()
+	        except Exception as e:
+        	        app_log.exception('Exception: %s', e)
 
+	#Get the screen state i.e. if it is on or off
 	def get_screen(self):
-        	f = open("/sys/class/backlight/rpi_backlight/bl_power","r")
-	        ch  = f.read(1)
-        	f.close()
-	
-	        return (ch == "0")
+		try:
+	        	f = open("/sys/class/backlight/rpi_backlight/bl_power","r")
+		        ch  = f.read(1)
+        		f.close()
+		        return (ch == "0")
+	        except Exception as e:
+        	        app_log.exception('Exception: %s', e)
 
 def run_program(main_app_log):
 	global main_application
