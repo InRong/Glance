@@ -32,10 +32,9 @@ class HelloWorld(object) :
 
 			self._db = DB.DB()
 			self._db.load_settings()
-
 			self.start_mosquito()
-
         	        self.publish_loop()
+
                 except Exception as e:
                         app_log.exception('Exception: %s', e)
 
@@ -46,7 +45,6 @@ class HelloWorld(object) :
 		        mosclient.subscribe(self._db.get_value("mostopic"))
                 except Exception as e:
                         app_log.exception('Exception: %s', e)
-
 
 	def on_message(self, mosclient, userdata, msg):
 		try:
@@ -107,12 +105,5 @@ def run_program(main_app_log):
 
 if __name__ == '__main__':
         run_program(None)
-
-
-
-
-
-
-
 
 
