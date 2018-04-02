@@ -1,5 +1,4 @@
 import sqlite3
-import time
 
 SETTING = 0
 VALUE = 1
