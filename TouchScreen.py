@@ -24,6 +24,7 @@ import time
 import os
 import myemail
 import Event
+from decimal import *
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -100,65 +101,23 @@ class MainScreen(Screen):
 
 		layout = FloatLayout(size=(800, 600))
 
-		data_label[1] = DataLabel(id="1", font_size='46pt', pos_hint={'x':0, 'y':0.44})
-    		data_label[1].color = [1.0,1.0,1.0,1.0]
-		Clock.schedule_interval(data_label[1].update, 1)
+		#Set up the screen labels - create them, setting the font, colour, position and size from the database. 
+		for label_loop in range(1, 12):
+			label_values = main_application.db.get_value("label" + str(label_loop)).split(",")
+			data_label[label_loop] = DataLabel(id=str(label_loop), font_size=label_values[0], pos_hint={'x':float(label_values[1]), 'y':float(label_values[2])})
+    			data_label[label_loop].color = [float(label_values[3]),float(label_values[4]),float(label_values[5]),float(label_values[6])]
+			Clock.schedule_interval(data_label[label_loop].update, float(label_values[7]))
 
-		data_label[2] = DataLabel(id="2", font_size='22pt', pos_hint={'x':0, 'y':0.33})
-    		data_label[2].color = [1.0,1.0,1.0,1.0]
-		Clock.schedule_interval(data_label[2].update, 1)
-
+		#depending on whether 12 or 24 hour clock, position the colon accordingly - come back to this..
 		if main_application.db.get_value("timestyle")=="12":
-			data_label[3] = DataLabel(id="3", font_size='96pt', pos_hint={'x':-0.28, 'y':0.13})
-    			data_label[3].color = [1.0,1.0,0.0,1.0]
-			Clock.schedule_interval(data_label[3].update, 0.1)
-
 			colon_label = DataLabel(id="35", font_size='96pt', pos_hint={'x':-0.32, 'y':0.15})
-    			colon_label.color = [1.0,1.0,0.0,1.0]
-			Clock.schedule_interval(colon_label.update, 0.1)
 		else:
-			data_label[3] = DataLabel(id="3", font_size='96pt', pos_hint={'x':-0.28, 'y':0.13})
-    			data_label[3].color = [1.0,1.0,0.0,1.0]
-			Clock.schedule_interval(data_label[3].update, 0.1)
-
 			colon_label = DataLabel(id="35", font_size='96pt', pos_hint={'x':-0.28, 'y':0.15})
-    			colon_label.color = [1.0,1.0,0.0,1.0]
-			Clock.schedule_interval(colon_label.update, 0.1)
 
-		data_label[4] = DataLabel(id="4", font_size='22pt',  pos_hint={'x':-0.28, 'y':-0.02})
-   		data_label[4].color = [1.0,1.0,0,1.0]
-		Clock.schedule_interval(data_label[4].update, 1)
+		colon_label.color = [1.0,1.0,0.0,1.0]
+		Clock.schedule_interval(colon_label.update, 0.1)
 
-		data_label[5] = DataLabel(id="5", font_size='22pt', pos_hint={'x':-0.28, 'y':-0.10})
-    		data_label[5].color = [1.0,1.0,1.0,1.0]
-		Clock.schedule_interval(data_label[5].update, 1)
-
-		data_label[6] = DataLabel(id="6", font_size='22pt', pos_hint={'x':-0.28, 'y':-0.18})
-    		data_label[6].color = [1.0,1.0,1.0,1.0]
-		Clock.schedule_interval(data_label[6].update, 1)
-
-		data_label[7] = DataLabel(id="7", font_size='36pt',  pos_hint={'x':0.21, 'y':0.19})
-   		data_label[7].color = [0,1.0,0,1.0]
-		Clock.schedule_interval(data_label[7].update, 1)
-
-		data_label[8] = DataLabel(id="8", font_size='36pt', pos_hint={'x':0.21, 'y':0.07})
-    		data_label[8].color = [0,1.0,0,1.0]
-		Clock.schedule_interval(data_label[8].update, 1)
-
-		data_label[9] = DataLabel(id="9",font_size='36pt', pos_hint={'x':0.21, 'y':-0.05})
-    		data_label[9].color = [0,1.0,0,1.0]
-		Clock.schedule_interval(data_label[9].update, 1)
-
-		data_label[10] = DataLabel(id="10", font_size='36pt', pos_hint={'x':0.21, 'y':-0.17})
-    		data_label[10].color = [0,1.0,0,1.0]
-		Clock.schedule_interval(data_label[10].update, 1)
-
-
-		data_label[11] = DataLabel(id="11", font_size='22pt', pos_hint={'x':0, 'y':-0.29})
-    		data_label[11].color = [1.0,1.0,1.0,1.0]
-		Clock.schedule_interval(data_label[11].update, 1)
-
-		#get the button count
+		#Find how many buttons we have and create and position them
 		main_application.button_count = 0
 		for btn_loop in range(0, 8):
 			str_btn_loop = str(btn_loop)
@@ -235,6 +194,9 @@ class MyApp(App):
 			self.display_text[x]=""
 			self.display_update[x]=time.time()
 
+		self.button_count = 0
+
+
 		self.light_value = 0
 		self.last_light_message = ""
 
@@ -247,8 +209,6 @@ class MyApp(App):
 		self.motion_value = False
 
 		self.last_event = None
-
-		self.button_count = 0
 
 		self.STALE_DATA_SECONDS = 700		
 
@@ -455,9 +415,9 @@ class MyApp(App):
 				self.read_settings()
 
 			for x in range(1, 13):
-				self.set_display(x, self.db.get_value("display" + str(x)))
+				self.update_display_text(x, self.db.get_value("display" + str(x)))
 
-			#Do we need to triger an event
+			#Do we need to trigger a scheduled event
 			if (self.last_mins <> utils.get_mins()): #check once a minute 
 				self.last_mins = utils.get_mins() 
 
@@ -474,7 +434,7 @@ class MyApp(App):
         	        app_log.exception('Exception: %s', e)
 
 
-	def set_display(self, digit, selection):
+	def update_display_text(self, digit, selection):
 
 		try:
 			#Time
