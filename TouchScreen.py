@@ -45,7 +45,7 @@ import time
 import os
 import myemail
 import Event
-from decimal import *
+import Audio
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -257,7 +257,7 @@ class MyApp(App):
 	def read_settings(self):
 		try:
 			if self.db.get_value("confirmationbeep") == "on" and self.started:
-				audio.play_beep()
+				Audio.play_beep()
 
 			self.file_modified_time_at_last_read = time.ctime(os.path.getmtime(self.db.get_file_path()))	
 

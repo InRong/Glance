@@ -18,10 +18,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-
-
-
 
 import socket
 from threading import Thread
@@ -70,11 +66,6 @@ class Launcher(object):
 
 		self.start_threads()
 
-#                self._db = DB.DB()
-#                self._db.load_settings()
-
-
-#                self.start_mos()
                 self.process_loop()
 
 
