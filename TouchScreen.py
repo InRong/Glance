@@ -257,7 +257,8 @@ class MyApp(App):
 	def read_settings(self):
 		try:
 			if self.db.get_value("confirmationbeep") == "on" and self.started:
-				Audio.play_beep()
+				audio = Audio.Audio()
+				audio.play_beep()
 
 			self.file_modified_time_at_last_read = time.ctime(os.path.getmtime(self.db.get_file_path()))	
 
@@ -567,13 +568,13 @@ class MyApp(App):
 
 	def send_motion_email(self):
 		try:
-			myemail.send_email(self.db.get_value("gmailaddress"), self.db.get_value("motionaddress"), "motion", "motion detected", self.db.get_value("emailpassword"))	
+			myemail.send_email(self.db.get_value("gmailaddress"), self.db.get_value("motionaddress"), "motion", "motion detected", self.db.get_value("gmailpassword"))	
 	        except Exception as e:
         	        app_log.exception('Exception: %s', e)
 
 	def send_event_non_dismiss_email(self):
 		try:
-			myemail.send_email(self.db.get_value("gmailaddress"), self.db.get_value("nondismissaddress"), "event", "event not dismissed within 2  minutes", self.db.get_value("emailpassword"))
+			myemail.send_email(self.db.get_value("gmailaddress"), self.db.get_value("nondismissaddress"), "event", "event not dismissed within 2  minutes", self.db.get_value("gmailpassword"))
 	        except Exception as e:
         	        app_log.exception('Exception: %s', e)
 
