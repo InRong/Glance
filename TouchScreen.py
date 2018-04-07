@@ -124,7 +124,8 @@ class MainScreen(Screen):
 
 		#Set up the screen labels - create them, setting the font, colour, position and size from the database. 
 		for label_loop in range(1, 12):
-			label_values = main_application.db.get_value("label" + str(label_loop)).split(",")
+			app_log.info("label loop - " + str(label_loop))
+			label_values = main_application.db.get_value("label" + str(label_loop)).split("^")
 			data_label[label_loop] = DataLabel(id=str(label_loop), font_size=label_values[0], pos_hint={'x':float(label_values[1]), 'y':float(label_values[2])})
     			data_label[label_loop].color = [float(label_values[3]),float(label_values[4]),float(label_values[5]),float(label_values[6])]
 			Clock.schedule_interval(data_label[label_loop].update, float(label_values[7]))
