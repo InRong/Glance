@@ -150,8 +150,8 @@ class Launcher(object):
 
 			elif (self.hostname == "bedroomtouch2"):
 
-       				self.mos_clock_thread = Thread(target=self.mos_clock,args=())
-				self.mos_clock_thread.start()
+       				self.touch_screen_thread = Thread(target=self.touch_screen,args=())
+				self.touch_screen_thread.start()
 
       				self.sensor_board_thread = Thread(target=self.sensor_board,args=())
 				self.sensor_board_thread.start()
@@ -170,8 +170,8 @@ class Launcher(object):
 
 			elif (self.hostname == "livingroom"):
 
-       				self.mos_clock_thread = Thread(target=self.mos_clock,args=())
-				self.mos_clock_thread.start()
+       				self.touch_screen_thread = Thread(target=self.touch_screen,args=())
+				self.touch_screen_thread.start()
 
       				self.sensor_board_thread = Thread(target=self.sensor_board,args=())
 				self.sensor_board_thread.start()
