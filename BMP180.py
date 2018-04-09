@@ -82,7 +82,7 @@ class BMP180(object) :
                 	try:
                         	self.get()
                         	if len(self._temperature)>0:
-                                	self.broadcast_send("temperature from BMP180", self._temperature + self.getunits("temperature"))
+                                	self.broadcast_send("temperature from BMP180", "Inside: " + self._temperature + self.getunits("temperature"))
                                 	self.broadcast_send("pressure from BMP180", self._pressure + self.getunits("pressure"))
                                 	self.broadcast_send("altitude from BMP180", self._altitude + self.getunits("altitude"))
 	                except Exception as e:
