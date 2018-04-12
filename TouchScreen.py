@@ -39,11 +39,10 @@ from kivy.uix.popup import Popup
 
 import paho.mqtt.client as mqtt
 import datetime
-import utils
+import Utils
 import DB
 import time
 import os
-import myemail
 import Event
 import Audio
 
@@ -56,9 +55,9 @@ app_log = None
 class DataLabel(Label):
 	def update(self, dt):
 		if self.id=="35":
-			if (utils.is_odd_seconds() or main_application.db.get_value('flashingtime') == "off"):
+			if (Utils.is_odd_seconds() or main_application.db.get_value('flashingtime') == "off"):
 				self.text = ":"
-				if main_application.db.get_value("timestyle")=="12" and len(utils.get_time_h_12())<2:
+				if main_application.db.get_value("timestyle")=="12" and len(Utils.get_time_h_12())<2:
 					self.pos_hint={'x':-0.33, 'y':0.15}
 				else:
 					self.pos_hint={'x':-0.28, 'y':0.15}
@@ -441,8 +440,8 @@ class MyApp(App):
 				self.update_display_text(x, self.db.get_value("display" + str(x)))
 
 			#Do we need to trigger a scheduled event
-			if (self.last_mins <> utils.get_mins()): #check once a minute 
-				self.last_mins = utils.get_mins() 
+			if (self.last_mins <> Utils.get_mins()): #check once a minute 
+				self.last_mins = Utils.get_mins() 
 
 			        event_list = Event.EventList()
 				next_event = event_list.get_next_event(self.db)	
@@ -463,20 +462,20 @@ class MyApp(App):
 			#Time
 			if selection == "@@time":
 				if self.db.get_value("timestyle")=="12":
-					self.display_text[digit]=utils.get_time_h_12() + " " + utils.get_time_hhmm()[2:4] 
+					self.display_text[digit]=Utils.get_time_h_12() + " " + Utils.get_time_hhmm()[2:4] 
  					self.display_update[digit]=time.time()
 				else:
-					self.display_text[digit]=utils.get_time_hhmm()[0:2] + " " + utils.get_time_hhmm()[2:4]
+					self.display_text[digit]=Utils.get_time_hhmm()[0:2] + " " + Utils.get_time_hhmm()[2:4]
 					self.display_update[digit]=time.time()
 
 			#Seconds
 			elif selection == "@@secs":
-				self.display_text[digit]=utils.get_secs()
+				self.display_text[digit]=Utils.get_secs()
 				self.display_update[digit]=time.time()
 
 			#Date
 			elif selection == "@@date":
-				self.display_text[digit]= utils.short_day() + " " + str(datetime.datetime.today().day) + " " + utils.full_month()
+				self.display_text[digit]= Utils.short_day() + " " + str(datetime.datetime.today().day) + " " + Utils.full_month()
 				self.display_update[digit]=time.time()
 
 			#Next Event
@@ -569,13 +568,13 @@ class MyApp(App):
 
 	def send_motion_email(self):
 		try:
-			myemail.send_email(self.db.get_value("gmailaddress"), self.db.get_value("motionaddress"), "motion", "motion detected", self.db.get_value("gmailpassword"))	
+			Utils.send_email(self.db.get_value("gmailaddress"), self.db.get_value("motionaddress"), "motion", "motion detected", self.db.get_value("gmailpassword"))	
 	        except Exception as e:
         	        app_log.exception('Exception: %s', e)
 
 	def send_event_non_dismiss_email(self):
 		try:
-			myemail.send_email(self.db.get_value("gmailaddress"), self.db.get_value("nondismissaddress"), "event", "event not dismissed within 2  minutes", self.db.get_value("gmailpassword"))
+			Utils.send_email(self.db.get_value("gmailaddress"), self.db.get_value("nondismissaddress"), "event", "event not dismissed within 2  minutes", self.db.get_value("gmailpassword"))
 	        except Exception as e:
         	        app_log.exception('Exception: %s', e)
 

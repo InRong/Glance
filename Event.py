@@ -20,7 +20,7 @@
 # limitations under the License.
 #
 #
-import utils
+import Utils
 import DB
 
 NUMBER_OF_EVENTS = 8
@@ -38,11 +38,11 @@ class Event(object):
 		return cmp(self._week_mins,other._week_mins)
 
 	def get_mins_until_event(self):
-	        now_week_mins = (utils.day_number()* 24 * 60) + (utils.get_hours()*60) + utils.get_mins()
+	        now_week_mins = (Utils.day_number()* 24 * 60) + (Utils.get_hours()*60) + Utils.get_mins()
 		return self._week_mins - now_week_mins
 
 	def get_hours_mins_until_event(self):
-		return utils.convert_mins_to_hours_mins(self.get_mins_until_event())
+		return Utils.convert_mins_to_hours_mins(self.get_mins_until_event())
 
 	@property
 	def name(self):
@@ -74,12 +74,12 @@ class Event(object):
 
 	def time_12(self):
 		if self._hours > 13:
-			return str(self._hours-12) + ":" + utils.to_string_with_leading_zero(self._mins) + "pm"
+			return str(self._hours-12) + ":" + Utils.to_string_with_leading_zero(self._mins) + "pm"
 		else:
-			return str(self._hours) + ":" + utils.to_string_with_leading_zero(self._mins) + "am"
+			return str(self._hours) + ":" + Utils.to_string_with_leading_zero(self._mins) + "am"
 	
 	def time_24(self):
-		return str(self._hours) + ":" + utils.to_string_with_leading_zero(self._mins)
+		return str(self._hours) + ":" + Utils.to_string_with_leading_zero(self._mins)
 
 	def get_time(self, is_24):
 		if is_24:
@@ -102,7 +102,7 @@ class EventList(object):
         	if db.get_value("eventson")=="off":
                 	return None
 
-	        now_mins = (utils.day_number()* 24 * 60) + (utils.get_hours()*60) + utils.get_mins()
+	        now_mins = (Utils.day_number()* 24 * 60) + (Utils.get_hours()*60) + Utils.get_mins()
 
         	x = 0
 	        while (x < NUMBER_OF_EVENTS):

@@ -22,7 +22,7 @@
 
 import pygame
 from pygame.locals import *
-import utils
+import Utils
 import os
 import inflect
 import math
@@ -121,9 +121,9 @@ class Audio(object):
 	def say_good_greeting(self):
 		greeting = ""
 		
-		if utils.get_hours() < 12:
+		if Utils.get_hours() < 12:
 			greeting = "goodmorning"
-		elif utils.get_hours() < 18:
+		elif Utils.get_hours() < 18:
 			greeting = "goodafternoon"
 		else:
 			greeting = "goodevening"
@@ -133,19 +133,19 @@ class Audio(object):
 	def say_time(self, style):
 	
 		if style == "12":
-			if (utils.get_mins()==0):
-       		 		self.play_multi('Clock//thetimeis.wav','Clock//' + utils.get_time_h_12() + '.wav','Clock//oclock.wav','Clock//exactly.wav')
-			elif (utils.get_mins()<10):
-        			self.play_multi('Clock//thetimeis.wav','Clock//' + utils.get_time_h_12() + '.wav','Clock//oh.wav','Clock//' + utils.get_time_m() + '.wav')
+			if (Utils.get_mins()==0):
+       		 		self.play_multi('Clock//thetimeis.wav','Clock//' + Utils.get_time_h_12() + '.wav','Clock//oclock.wav','Clock//exactly.wav')
+			elif (Utils.get_mins()<10):
+        			self.play_multi('Clock//thetimeis.wav','Clock//' + Utils.get_time_h_12() + '.wav','Clock//oh.wav','Clock//' + Utils.get_time_m() + '.wav')
 			else:
-        			self.play_multi('Clock//thetimeis.wav','Clock//' + utils.get_time_h_12() + '.wav','Clock//' + utils.get_time_m() + '.wav')
+        			self.play_multi('Clock//thetimeis.wav','Clock//' + Utils.get_time_h_12() + '.wav','Clock//' + Utils.get_time_m() + '.wav')
 		else:	
-			if (utils.get_mins()==0):
-       		 		self.play_multi('Clock//thetimeis.wav','Clock//' + utils.get_time_h() + '.wav','Clock//hundred.wav','Clock//hours.wav')
-			elif (utils.get_mins()<10):
-        			self.play_multi('Clock//thetimeis.wav','Clock//' + utils.get_time_h() + '.wav','Clock//oh.wav','Clock//' + utils.get_time_m() + '.wav')
+			if (Utils.get_mins()==0):
+       		 		self.play_multi('Clock//thetimeis.wav','Clock//' + Utils.get_time_h() + '.wav','Clock//hundred.wav','Clock//hours.wav')
+			elif (Utils.get_mins()<10):
+        			self.play_multi('Clock//thetimeis.wav','Clock//' + Utils.get_time_h() + '.wav','Clock//oh.wav','Clock//' + Utils.get_time_m() + '.wav')
 			else:
-        			self.play_multi('Clock//thetimeis.wav','Clock//' + utils.get_time_h() + '.wav','Clock//' + utils.get_time_m() + '.wav')
+        			self.play_multi('Clock//thetimeis.wav','Clock//' + Utils.get_time_h() + '.wav','Clock//' + Utils.get_time_m() + '.wav')
 
 
 	def say_inspiration(self):
