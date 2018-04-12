@@ -2,9 +2,6 @@
 
 Installation Instructions
 
-
-Installation Instructions
-
 1.	Download the latest Kivypie  and install to SD card. Insert into RPI, connect to the network and powerup! 
 
 2.	Upgrade to latest versions of the packages
