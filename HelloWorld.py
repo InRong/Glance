@@ -54,7 +54,7 @@ class HelloWorld(object) :
 
 			self._db = DB.DB()
 			self._db.load_settings()
-			self.start_mosquito()
+			self.start_mosquitto()
         	        self.publish_loop()
 
                 except Exception as e:
@@ -80,7 +80,7 @@ class HelloWorld(object) :
                 except Exception as e:
                         app_log.exception('Exception: %s', e)
 
-	def start_mosquito(self):
+	def start_mosquitto(self):
 		try:
 	       		self.mos_client = mqtt.Client()
         	       	self.mos_client.on_connect = self.on_connect
