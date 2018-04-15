@@ -44,6 +44,7 @@ import Sounds
 import YahooWeather
 import HKWeather
 import Transport
+import RPIIO
 
 class Launcher(object):
 
@@ -111,6 +112,9 @@ class Launcher(object):
 	def transport(self):
 		Transport.run_program(self.app_log)
 
+	def rpiio(self):
+		RPIIO.run_program(self.app_log)
+
 	def process_loop(self):
                 try:
 			while(True):	
@@ -144,6 +148,9 @@ class Launcher(object):
 
         			self.hk_weather_thread = Thread(target=self.hk_weather,args=())
 				self.hk_weather_thread.start()
+
+        			self.rpiio_thread = Thread(target=self.rpiio,args=())
+				self.rpiio_thread.start()
 
         			self.transport_thread = Thread(target=self.transport,args=())
 				self.transport_thread.start()
