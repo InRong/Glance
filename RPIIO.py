@@ -28,9 +28,6 @@ from logging.handlers import RotatingFileHandler
 import threading
 import RPi.GPIO as GPIO
 
-relay1=21
-relay2=6
-
 SLEEP_TIME = 1
 
 class RPIIO(object) :
@@ -54,23 +51,22 @@ class RPIIO(object) :
 	                else:
         	                self.app_log = main_app_log
 
-#			self._data = "Hello World"
+			self._db = DB.DB()
+			self._db.load_settings()
 
 	                GPIO.setmode(GPIO.BCM)
 
-        	        GPIO.setup(relay1, GPIO.OUT)
-                	GPIO.output(relay1, GPIO.LOW)
+        	        GPIO.setup(int(self._db.get_value("rpioout1")), GPIO.OUT)
+                	GPIO.output(int(self._db.get_value("rpioout1")), GPIO.LOW)
 
-	                GPIO.setup(relay2, GPIO.OUT)
-        	        GPIO.output(relay2, GPIO.LOW)
+	                GPIO.setup(int(self._db.get_value("rpioout2")), GPIO.OUT)
+        	        GPIO.output(int(self._db.get_value("rpioout2")), GPIO.LOW)
 
-			self._db = DB.DB()
-			self._db.load_settings()
 			self.start_mosquitto()
         	        self.publish_loop()
 
                 except Exception as e:
-                        app_log.exception('Exception: %s', e)
+                        self.app_log.exception('Exception: %s', e)
 
 
 	def on_connect(self, mosclient, userdata, flags, rc):
@@ -78,11 +74,9 @@ class RPIIO(object) :
 	        	self.app_log.info("Subscribing to topic: " + self._db.get_value("mostopic"))
 		        mosclient.subscribe(self._db.get_value("mostopic"))
                 except Exception as e:
-                        app_log.exception('Exception: %s', e)
+                        self.app_log.exception('Exception: %s', e)
 
 	def on_message(self, mosclient, userdata, msg):
-		global relay1
-		global relay2
 
 		try:
 	                messageparts = str(msg.payload).split("/")
@@ -90,21 +84,20 @@ class RPIIO(object) :
         	        if len(messageparts)==3:
 	                        #command is 1+, 2+ etc to turn high, 1-, 2- etc low
         	                if messageparts[0] == self._db.get_value("name") and  messageparts[1] == "RPIIO":
-                	                if messageparts[2] == "1+":
-                        	                self.app_log.info("relay1 true")
-                                        	GPIO.output(relay1, GPIO.HIGH)
-                                	elif messageparts[2] == "1-":
-	                                        self.app_log.info("relay1 False")
-        	                                GPIO.output(relay1, GPIO.LOW)
-                	                elif messageparts[2] == "2+":
-                        	                self.app_log.info("relay2 true")
-                                	        GPIO.output(relay2, GPIO.HIGH)
-	                                elif messageparts[2] == "2-":
-        	                                self.app_log.info ("relay2 False")
-                	                        GPIO.output(relay2, GPIO.LOW)
+					
+	                                if (messageparts[2][-1:]=="+"): #Last character should be + or -
+						command = GPIO.HIGH
+					else:
+						command = GPIO.LOW
+
+					io = messageparts[2][:len(messageparts[2])-1]
+
+		        	        rpioout = self._db.get_value("rpioout" + io)
+
+                                       	GPIO.output(int(rpioout), command)
 
                 except Exception as e:
-                        app_log.exception('Exception: %s', e)
+                        self.app_log.exception('Exception: %s', e)
 
 	def start_mosquitto(self):
 		try:
@@ -122,19 +115,19 @@ class RPIIO(object) :
 	               	logging.info("Connected")
         	       	self.mos_client.loop_start()
                 except Exception as e:
-                        app_log.exception('Exception: %s', e)
+                        self.app_log.exception('Exception: %s', e)
 
 	def get_data(self):
 		try:
 	        	return "1"
                 except Exception as e:
-                        app_log.exception('Exception: %s', e)
+                        self.app_log.exception('Exception: %s', e)
 
 	def set_data(self,new_data):
 		try:
 			self._data = new_data
                 except Exception as e:
-                        app_log.exception('Exception: %s', e)
+                        self.app_log.exception('Exception: %s', e)
 
 	def publish_loop(self):
 		while(1):
