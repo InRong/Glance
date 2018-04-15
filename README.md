@@ -133,6 +133,7 @@ Type
 sudo sqlite3 clp.db
 select * from settings
 select * from messages
+
 'HUE user and HUB IP
 insert into settings (setting,value) VALUES ('hueuser', '<your value>');
 insert into settings (setting,value) VALUES ('huehubip', '<your value>');
@@ -150,6 +151,17 @@ insert into settings (setting,value) VALUES ('alphavantageapikey', '<your value>
 insert into settings (setting,value) VALUES ('alphavantagestock1', 'MSFT');
 insert into settings (setting,value) VALUES ('alphavantagefromcurrency1', 'USD');
 insert into settings (setting,value) VALUES ('alphavantagetocurrency1', 'JPY');
+
+'For RPIIO - 
+insert into settings (setting,value) VALUES ('rpioout1', '21');
+insert into settings (setting,value) VALUES ('rpioout2', '6');
+
+insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIO','1+','LED On','0','1');
+insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIO','1-','LED Off','0','1');
+
+insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIO','2+','LED2 On','0','1');
+insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIO','2-','LED2 Off','0','1');
+
 
 Note that a restart may be necessary after the database update. 
 
