@@ -58,7 +58,7 @@ class HelloWorld(object) :
         	        self.publish_loop()
 
                 except Exception as e:
-                        app_log.exception('Exception: %s', e)
+                        self.app_log.exception('Exception: %s', e)
 
 
 	def on_connect(self, mosclient, userdata, flags, rc):
@@ -66,7 +66,7 @@ class HelloWorld(object) :
 	        	self.app_log.info("Subscribing to topic: " + self._db.get_value("mostopic"))
 		        mosclient.subscribe(self._db.get_value("mostopic"))
                 except Exception as e:
-                        app_log.exception('Exception: %s', e)
+                        self.app_log.exception('Exception: %s', e)
 
 	def on_message(self, mosclient, userdata, msg):
 		try:
@@ -78,7 +78,7 @@ class HelloWorld(object) :
 					if messageparts[1] == "SetHelloWorld":
 						self.set_data(messageparts[2])
                 except Exception as e:
-                        app_log.exception('Exception: %s', e)
+                        self.app_log.exception('Exception: %s', e)
 
 	def start_mosquitto(self):
 		try:
@@ -96,19 +96,19 @@ class HelloWorld(object) :
 	               	logging.info("Connected")
         	       	self.mos_client.loop_start()
                 except Exception as e:
-                        app_log.exception('Exception: %s', e)
+                        self.app_log.exception('Exception: %s', e)
 
 	def get_data(self):
 		try:
 	        	return self._data #For use in a real situation, this would be replaced with code to get the data e.g. GPIO status
                 except Exception as e:
-                        app_log.exception('Exception: %s', e)
+                        self.app_log.exception('Exception: %s', e)
 
 	def set_data(self,new_data):
 		try:
 			self._data = new_data
                 except Exception as e:
-                        app_log.exception('Exception: %s', e)
+                        self.app_log.exception('Exception: %s', e)
 
 	def publish_loop(self):
 		while(1):
@@ -118,7 +118,7 @@ class HelloWorld(object) :
 				#In our case here, initially, "Bedroom Touch/HelloWorld/Hello World"
 	                	self.mos_client.publish(self._db.get_value("mostopic"), self._db.get_value("name") + "/HelloWorld/" + self.get_data())
         	        except Exception as e:
-                	        app_log.exception('Exception: %s', e)
+                	        self.app_log.exception('Exception: %s', e)
 			finally:
 				time.sleep(SLEEP_TIME)
 
