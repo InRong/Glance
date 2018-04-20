@@ -98,14 +98,16 @@ class IndicatorImage(Image):
 
 class MyToggleButton(ToggleButton):
 	def callback(self, event):
-		if self.state == "down":
-			main_application.send_message_set("button" + self.id + "on")
-		else:
-			main_application.send_message_set("button" + self.id + "off")
+		if main_application.get_screen():#if the screen is on
+			if self.state == "down":
+				main_application.send_message_set("button" + self.id + "on")
+			else:
+				main_application.send_message_set("button" + self.id + "off")
 
 class MyButton(Button):
 	def callback(self, event):
-		main_application.send_message_set("button" + self.id + "on")
+		if main_application.get_screen():#if the screen is on
+			main_application.send_message_set("button" + self.id + "on")
 
 class MainScreen(Screen):
 	def __init__ (self,**kwargs):
@@ -194,7 +196,6 @@ class MainScreen(Screen):
 		main_application.last_event = None
 
 		super(MainScreen, self).on_touch_down(touch)
-
 
 class MyApp(App):
 	global app_log
