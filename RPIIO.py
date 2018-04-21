@@ -28,7 +28,7 @@ from logging.handlers import RotatingFileHandler
 import threading
 import RPi.GPIO as GPIO
 
-SLEEP_TIME = 1
+SLEEP_TIME = 0.1
 
 class RPIIO(object) :
 	def __init__(self, main_app_log):
@@ -54,12 +54,14 @@ class RPIIO(object) :
 			self._db = DB.DB()
 			self._db.load_settings()
 
+			self.rpi_io_in_dict = {}
+
 	                GPIO.setmode(GPIO.BCM)
 
 			# set up the outputs
 			x = 1
 			while(True):
-				db_result = self._db.get_value("rpioout" + str(x))
+				db_result = self._db.get_value("rpiioout" + str(x))
 				if (db_result is None):
 					break
 
@@ -69,11 +71,13 @@ class RPIIO(object) :
 			# set up the inputs
 			x = 1
 			while(True):
-				db_result = self._db.get_value("rpioin" + str(x))
+				db_result = self._db.get_value("rpiioin" + str(x))
 				if (db_result is None):
 					break
 
-	        	        GPIO.setup(int(db_result), GPIO.IN)
+	        	        GPIO.setup(int(db_result), GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+				#Tracking the state of the input
+				self.rpi_io_in_dict["rpiioin" + str(x)]=None
 				x = x + 1
 
 			self.start_mosquitto()
@@ -94,6 +98,7 @@ class RPIIO(object) :
 
 		try:
 	                messageparts = str(msg.payload).split("/")
+			print(messageparts)
 
         	        if len(messageparts)==3:
 	                        #command is 1+, 2+ etc to turn high, 1-, 2- etc low
@@ -106,9 +111,9 @@ class RPIIO(object) :
 
 					io = messageparts[2][:len(messageparts[2])-1]
 
-		        	        rpioout = self._db.get_value("rpioout" + io)
+		        	        rpi_io_out = self._db.get_value("rpiioout" + io)
 
-                                       	GPIO.output(int(rpioout), command)
+                                       	GPIO.output(int(rpi_io_out), command)
 
                 except Exception as e:
                         self.app_log.exception('Exception: %s', e)
@@ -136,24 +141,27 @@ class RPIIO(object) :
 			try:
 				x = 1
 				while(True):
-					db_result = self._db.get_value("rpioin" + str(x))
+					db_result = self._db.get_value("rpiioin" + str(x))
 					if (db_result is None):
 						break
 
-		        	        if GPIO.input(int(db_result)): # button is released
-                                		self.mos_client.publish(self._db.get_value("mostopic"), self._db.get_value("name") + "/RPIIOIN" + str(x) +  "/+")
-		                                self.app_log.info(str(x) + " pressed")
- 					else:
-                                		self.mos_client.publish(self._db.get_value("mostopic"), self._db.get_value("name") + "/RPIIOIN" + str(x) +  "/-")
-		                                self.app_log.info(str(x) + " not pressed")
-                        
+					old_state = self.rpi_io_in_dict["rpiioin" + str(x)]
+		        	        state = GPIO.input(int(db_result))
+					
+					#If the state of this input has changed, broadcast it 
+					if state != old_state:
+						if state:
+	                                		self.mos_client.publish(self._db.get_value("mostopic"), self._db.get_value("name") + "/RPIIOIN" + str(x) +  "/+")
+						else:
+	                                		self.mos_client.publish(self._db.get_value("mostopic"), self._db.get_value("name") + "/RPIIOIN" + str(x) +  "/-")
+		                                self.app_log.info(str(x) + " pressed is " + str(state))
+						self.rpi_io_in_dict["rpiioin" + str(x)] = state
 					x = x + 1
 
         	        except Exception as e:
                 	        self.app_log.exception('Exception: %s', e)
 			finally:
 				time.sleep(SLEEP_TIME)
-			time.sleep(SLEEP_TIME)
 			
 
 def run_program(main_app_log):
