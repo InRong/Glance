@@ -56,11 +56,25 @@ class RPIIO(object) :
 
 	                GPIO.setmode(GPIO.BCM)
 
-        	        GPIO.setup(int(self._db.get_value("rpioout1")), GPIO.OUT)
-                	GPIO.output(int(self._db.get_value("rpioout1")), GPIO.LOW)
+			# set up the outputs
+			x = 1
+			while(True):
+				db_result = self._db.get_value("rpioout" + str(x))
+				if (db_result is None):
+					break
 
-	                GPIO.setup(int(self._db.get_value("rpioout2")), GPIO.OUT)
-        	        GPIO.output(int(self._db.get_value("rpioout2")), GPIO.LOW)
+	        	        GPIO.setup(int(db_result), GPIO.OUT)
+				x = x + 1
+
+			# set up the inputs
+			x = 1
+			while(True):
+				db_result = self._db.get_value("rpioin" + str(x))
+				if (db_result is None):
+					break
+
+	        	        GPIO.setup(int(db_result), GPIO.IN)
+				x = x + 1
 
 			self.start_mosquitto()
         	        self.publish_loop()
@@ -83,7 +97,7 @@ class RPIIO(object) :
 
         	        if len(messageparts)==3:
 	                        #command is 1+, 2+ etc to turn high, 1-, 2- etc low
-        	                if messageparts[0] == self._db.get_value("name") and  messageparts[1] == "RPIIO":
+        	                if messageparts[0] == self._db.get_value("name") and  messageparts[1]=="RPIIOOUT":
 					
 	                                if (messageparts[2][-1:]=="+"): #Last character should be + or -
 						command = GPIO.HIGH
@@ -108,38 +122,37 @@ class RPIIO(object) :
 	               	if len(self._db.get_value("mospassword"))>0:
         	        	self.mos_client.username_pw_set(self._db.get_value("mosusername"),self._db.get_value("mospassword"))
 
-	               	logging.info("Connecting to: " + self._db.get_value("mosbrokeraddress"))
+	               	self.app_log.info("Connecting to: " + self._db.get_value("mosbrokeraddress"))
 
         	       	self.mos_client.connect(self._db.get_value("mosbrokeraddress"), int(self._db.get_value("mosbrokerport")), 60)
 
-	               	logging.info("Connected")
+	               	self.app_log.info("Connected")
         	       	self.mos_client.loop_start()
-                except Exception as e:
-                        self.app_log.exception('Exception: %s', e)
-
-	def get_data(self):
-		try:
-	        	return "1"
-                except Exception as e:
-                        self.app_log.exception('Exception: %s', e)
-
-	def set_data(self,new_data):
-		try:
-			self._data = new_data
                 except Exception as e:
                         self.app_log.exception('Exception: %s', e)
 
 	def publish_loop(self):
 		while(1):
-#			try:
-				#share the data every second by sending the data onto the Mosquito 
-				#Message format is <source host>/<Message Name>/<Message Value>
-				#In our case here, initially, "Bedroom Touch/HelloWorld/Hello World"
-#	                	self.mos_client.publish(self._db.get_value("mostopic"), self._db.get_value("name") + "/RPIIO/" + self.get_data())
- #       	        except Exception as e:
-  #              	        app_log.exception('Exception: %s', e)
-#			finally:
-#				time.sleep(SLEEP_TIME)
+			try:
+				x = 1
+				while(True):
+					db_result = self._db.get_value("rpioin" + str(x))
+					if (db_result is None):
+						break
+
+		        	        if GPIO.input(int(db_result)): # button is released
+                                		self.mos_client.publish(self._db.get_value("mostopic"), self._db.get_value("name") + "/RPIIOIN" + str(x) +  "/+")
+		                                self.app_log.info(str(x) + " pressed")
+ 					else:
+                                		self.mos_client.publish(self._db.get_value("mostopic"), self._db.get_value("name") + "/RPIIOIN" + str(x) +  "/-")
+		                                self.app_log.info(str(x) + " not pressed")
+                        
+					x = x + 1
+
+        	        except Exception as e:
+                	        self.app_log.exception('Exception: %s', e)
+			finally:
+				time.sleep(SLEEP_TIME)
 			time.sleep(SLEEP_TIME)
 			
 
