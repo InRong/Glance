@@ -153,15 +153,17 @@ insert into settings (setting,value) VALUES ('alphavantagefromcurrency1', 'USD')
 insert into settings (setting,value) VALUES ('alphavantagetocurrency1', 'JPY');
 
 'For RPIIO - 
-insert into settings (setting,value) VALUES ('rpioout1', '21');
-insert into settings (setting,value) VALUES ('rpioout2', '6');
+insert into settings (setting,value) VALUES ('rpiioout1', '21');
+insert into settings (setting,value) VALUES ('rpiioout2', '6');
+insert into settings (setting,value) VALUES ('rpiioin1', '4');
+insert into settings (setting,value) VALUES ('rpiioin2', '17');
 
-insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIO','1+','LED On','0','1');
-insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIO','1-','LED Off','0','1');
-
-insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIO','2+','LED2 On','0','1');
-insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIO','2-','LED2 Off','0','1');
-
+insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIOOUT','1+','LED 1 On','0','1');
+insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIOOUT','1-','LED 1 Off','0','1');
+insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIOOUT','2+','LED2 On','0','1');
+insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIOOUT','2-','LED2 Off','0','1');
+insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIOIN1','','Switch 1','1','0');
+insert into messages (host, name, value, description, display,action) values ('Bedroom Touchscreen','RPIIOIN2','','Switch 2','1','0');
 
 Note that a restart may be necessary after the database update. 
 
