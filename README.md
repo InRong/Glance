@@ -167,7 +167,7 @@ insert into messages (host, name, value, description, display,action) values ('B
 
 
 insert into settings (setting,value) VALUES ('nighttime', '23:00');
-insert into settings (setting,value) VALUES ('morningtime', '7:00');
+insert into settings (setting,value) VALUES ('morningtime', '6:00');
 insert into settings (setting,value) VALUES ('afternoontime', '12:00');
 insert into settings (setting,value) VALUES ('eveningtime', '19:00');
 
