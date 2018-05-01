@@ -46,9 +46,16 @@ import HKWeather
 import Transport
 import RPIIO
 
+import os
+
+
 class Launcher(object):
 
         def __init__(self):
+
+		directory = "logs"
+		if not os.path.exists(directory):
+    			os.makedirs(directory)
 
 		self.hostname = socket.gethostname().lower()
 
