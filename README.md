@@ -172,6 +172,12 @@ insert into settings (setting,value) VALUES ('afternoontime', '12:00');
 insert into settings (setting,value) VALUES ('eveningtime', '19:00');
 
 
+insert into messages (host, name, value, description, display,action) values ('','If Morning','if','If Morning','0','1');
+insert into messages (host, name, value, description, display,action) values ('','If Afternoon','if','If Afternoon','0','1');
+insert into messages (host, name, value, description, display,action) values ('','If Evening','if','If Evening','0','1');
+insert into messages (host, name, value, description, display,action) values ('','If Night','if','If Night','0','1');
+
+
 Note that a restart may be necessary after the database update. 
 
 10.	To make the system autorun at boot, 
