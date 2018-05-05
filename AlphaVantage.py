@@ -69,40 +69,58 @@ class AlphaVantage(object):
                 self.process_loop()
 
 	def get_stock(self, symbol):
-		self._symbol = symbol
-		self._stock_last_refreshed = ""
-		self._close = ""
+		try:
+			self._symbol = symbol
+			self._stock_last_refreshed = ""
+			self._close = ""
 	
-		baseurl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=" + symbol + "&apikey=" + self._db.get_value("alphavantageapikey")
-		result = urllib2.urlopen(baseurl).read()
-		data = json.loads(result)
-		self.app_log.info(data)
+			baseurl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=" + symbol + "&apikey=" + self._db.get_value("alphavantageapikey")
+			result = urllib2.urlopen(baseurl).read()
+			data = json.loads(result)
+			self.app_log.info(data)
 
-		self._symbol =  data['Meta Data']['2. Symbol']
-		self._stock_last_refreshed =  data['Meta Data']['3. Last Refreshed']
-		self._close = data['Time Series (Daily)'][self._stock_last_refreshed]['4. close']
-		D = decimal.Decimal
-		self._closef = D(self._close)
+			self._symbol =  data['Meta Data']['2. Symbol']
+			self._stock_last_refreshed =  data['Meta Data']['3. Last Refreshed']
+			self._close = data['Time Series (Daily)'][self._stock_last_refreshed]['4. close']
+			D = decimal.Decimal
+			self._closef = D(self._close)
+		except urllib2.HTTPError as err:
+			if err.code == 503:
+				#Add some custom error handling / displaying here
+				self._close = 'Unavailable'
+                        	self.app_log.exception('Exception: %s', err)
+			else:
+       				raise
 
 
 	def get_currency(self, from_currency, to_currency):
-		self._from_currency = from_currency
-		self._to_currency = to_currency
-		self._exchange_rate = ""
-		self._currency_last_refreshed = ""
+		try:
+			self._from_currency = from_currency
+			self._to_currency = to_currency
+			self._exchange_rate = ""
+			self._currency_last_refreshed = ""
 	
-		baseurl = "https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=" + from_currency + "&to_currency=" + to_currency + "&apikey=" + self._db.get_value("alphavantageapikey")
-		result = urllib2.urlopen(baseurl).read()
-		data = json.loads(result)
-		self.app_log.info(data)
+			baseurl = "https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=" + from_currency + "&to_currency=" + to_currency + "&apikey=" + self._db.get_value("alphavantageapikey")
 
-		self._from_currency =  data['Realtime Currency Exchange Rate']['1. From_Currency Code']
-		self._to_currency =  data['Realtime Currency Exchange Rate']['3. To_Currency Code']
-		self._exchange_rate = data['Realtime Currency Exchange Rate']['5. Exchange Rate']
-		D = decimal.Decimal
-		self._exchange_ratef = D(data['Realtime Currency Exchange Rate']['5. Exchange Rate'])
-		self._currency_last_refreshed = data['Realtime Currency Exchange Rate']['6. Last Refreshed']
+			result = urllib2.urlopen(baseurl).read()
 
+
+			data = json.loads(result)
+			self.app_log.info(data)
+
+#			self._from_currency =  data['Realtime Currency Exchange Rate']['1. From_Currency Code']
+#			self._to_currency =  data['Realtime Currency Exchange Rate']['3. To_Currency Code']
+			self._exchange_rate = data['Realtime Currency Exchange Rate']['5. Exchange Rate']
+			D = decimal.Decimal
+			self._exchange_ratef = D(data['Realtime Currency Exchange Rate']['5. Exchange Rate'])
+			self._currency_last_refreshed = data['Realtime Currency Exchange Rate']['6. Last Refreshed']
+		except urllib2.HTTPError as err:
+			if err.code == 503:
+				#Add some custom error handling / displaying here
+				self._exchange_rate = 'Unavailable'
+                        	self.app_log.exception('Exception: %s', err)
+			else:
+       				raise
 
         def on_connect(self, mosclient, userdata, flags, rc):
                 self.app_log.info("Subscribing to topic: " + self._db.get_value("mostopic"))
@@ -133,11 +151,14 @@ class AlphaVantage(object):
 		while(1):
 			try:
 				#Data is refreshed every 10 minutes
-
 				self.get_currency(self._db.get_value("alphavantagefromcurrency1"), self._db.get_value("alphavantagetocurrency1"))
 		
 				if len(self._exchange_rate) > 0:
-               	                        message =  self._db.get_value("name") + "/AlphaVantage Exchange Rate/" + self._from_currency + self._to_currency + " " + "{:.2f}".format(self._exchange_ratef)
+					if  (self._exchange_rate == 'Unavailable'):
+        	       	                        message =  self._db.get_value("name") + "/AlphaVantage Exchange Rate/" + self._from_currency + self._to_currency + " " + "unav."
+					else:
+        	       	                        message =  self._db.get_value("name") + "/AlphaVantage Exchange Rate/" + self._from_currency + self._to_currency + " " + "{:.2f}".format(self._exchange_ratef)
+					
 					self.mos_client.publish(self._db.get_value("mostopic"), message)
 					self.app_log.info("Sent " + message)
 				else:
@@ -154,7 +175,11 @@ class AlphaVantage(object):
 				self.get_stock(self._db.get_value("alphavantagestock1"))
 				#This is broadcast every minute, if valid
 				if len(self._close) > 0:
-               	                        message =  self._db.get_value("name") + "/AlphaVantage Stock Close/" + self._symbol + " Close " + "{:.2f}".format(self._closef)
+					if  (self._exchange_rate == 'Unavailable'):
+               	                        	message =  self._db.get_value("name") + "/AlphaVantage Stock Close/" + self._symbol + " Close unav." 
+					else:				
+	               	                        message =  self._db.get_value("name") + "/AlphaVantage Stock Close/" + self._symbol + " Close " + "{:.2f}".format(self._closef)
+
 					self.mos_client.publish(self._db.get_value("mostopic"), message)
 					self.app_log.info("Sent " + message)
 				else:
