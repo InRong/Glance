@@ -40,6 +40,12 @@ FRI = 4
 SAT = 5
 SUN = 6
 
+
+MORNING = 0
+AFTERNOON = 1
+EVENING = 2
+NIGHT = 3
+
 def get_hours():
         return int(time.strftime("%H"))
 

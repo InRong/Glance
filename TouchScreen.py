@@ -206,11 +206,6 @@ class MyApp(App):
 		self.away = False
 		self.started = False
 
-		self.MORNING = 0
-		self.AFTERNOON = 1
-		self.EVENING = 2
-		self.NIGHT = 3
-
 		self.display_text=[None]*13
 		self.display_update = [None]*13
 		self.settings_buttons = [None]*10
