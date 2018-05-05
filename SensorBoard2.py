@@ -73,6 +73,10 @@ class SensorBoard(object) :
 
 	def automation1(self):
 		last_pir = ""
+                last_value = [None]*10
+                for x in range(6):
+                        last_value[x] = "on"
+
 		result = ""
 		mid = ""
 
@@ -82,6 +86,22 @@ class SensorBoard(object) :
                         	io_status = self.get()
 				self.app_log.info("sensor board io_status...")
 				self.app_log.info(io_status)
+
+				#deal with the Switches
+				for x in range(6):
+					input_bit = 2**x
+	                       	 	if (io_status & input_bit):
+		                        	if last_value[x] != "on":
+							last_value[x] = "on"
+							result, mid = self.mos_client.publish(self._db.get_value("mostopic"), self._db.get_value("name") + "/SensorBoardIn" + str(x) + "/on")
+							self.app_log.info("sending on for " + str(x))
+							self.app_log.info(mid)
+					else:
+		                        	if last_value[x] != "off":
+							last_value[x] = "off"
+							result, mid = self.mos_client.publish(self._db.get_value("mostopic"), self._db.get_value("name") + "/SensorBoardIn" + str(x) + "/off")
+							self.app_log.info("sending off for " + str(x))
+							self.app_log.info(mid)
 
 				#deal with the PIR
                        	 	if not (io_status & 64):
@@ -94,7 +114,7 @@ class SensorBoard(object) :
 	                        	if last_pir != "off":
 						result, mid = self.mos_client.publish(self._db.get_value("mostopic"), self._db.get_value("name") + "/PIR/off")
 						last_pir = "off"
-						self.app_log.info("sending off")
+						self.app_log.info("sending off for PIR")
 						self.app_log.info(mid)
 
 
@@ -124,7 +144,7 @@ class SensorBoard(object) :
                        	incoming = messageparts[0] + "/" + messageparts[1]
 
 			#command is 1+, 2+ etc to turn high, 1-, 2- etc low
-                       	if messageparts[0] == self._db.get_value("name") and  messageparts[1] == "I2CIO":
+                       	if messageparts[0] == self._db.get_value("name") and  messageparts[1] == "SensorBoardOut":
 				self.app_log.info("Incoming - " + incoming + "/" + messageparts[2])
 
 				switch_on = (messageparts[2][-1:] == "+") #Last character should be + or -
@@ -159,11 +179,13 @@ class SensorBoard(object) :
         def write_bit(self, bit, state):
 
 		overlay_value = 2**bit
+		print ("Writing bit")
+		print (bit)
+		print (state)
 
-		if state == True:
+		if not state:
 			to_write = self._last_written_value | overlay_value
 			self.write_byte(to_write)
-
 		else:
 			to_write = self._last_written_value & (0xFF - overlay_value)
 	               	self.write_byte(to_write)
