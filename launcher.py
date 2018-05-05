@@ -32,6 +32,7 @@ from logging.handlers import RotatingFileHandler
 import TouchScreen
 import GoogleCalendar
 import SensorBoard
+import SensorBoard2
 import GY30
 import BMP180
 import DHT12
@@ -46,16 +47,9 @@ import HKWeather
 import Transport
 import RPIIO
 
-import os
-
-
 class Launcher(object):
 
         def __init__(self):
-
-		directory = "logs"
-		if not os.path.exists(directory):
-    			os.makedirs(directory)
 
 		self.hostname = socket.gethostname().lower()
 
@@ -85,6 +79,9 @@ class Launcher(object):
 
 	def sensor_board(self):
 		SensorBoard.run_program(self.app_log)
+
+	def sensor_board_2(self):
+		SensorBoard2.run_program(self.app_log)
 
 	def gy30(self):
 		GY30.run_program(self.app_log)
@@ -167,8 +164,8 @@ class Launcher(object):
        				self.touch_screen_thread = Thread(target=self.touch_screen,args=())
 				self.touch_screen_thread.start()
 
-      				self.sensor_board_thread = Thread(target=self.sensor_board,args=())
-				self.sensor_board_thread.start()
+      				self.sensor_board_2_thread = Thread(target=self.sensor_board_2,args=())
+				self.sensor_board_2_thread.start()
 
 	       			self.gy30_thread = Thread(target=self.gy30,args=())
 				self.gy30_thread.start()
