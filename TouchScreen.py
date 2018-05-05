@@ -537,133 +537,7 @@ class MyApp(App):
 
 
 	def send_message_set(self, set_name):
-		Thread(target=self.send_messages,args=(set_name,)).start()
-
-	def send_messages(self, set_name):
-		app_log.info("set_name is .... " + set_name)
-
-		for cmd_loop in range(0, 9):
-			set_step = set_name + "-" + str(cmd_loop)
-			message_id = self.db.get_value(set_step)
-
-			#break because end of the steps. 
-			if message_id == "-": 
-				break
-
-			message = self.db.get_message(set_step)
-			print (message)			
-			
-			app_log.info(message)
-			app_log.info(set_step)
-		
-			if "If Away" in message:
-				host, name, value = message.split("/")			
-				if value=="if" and not away:
-					break
-				elif value=="not" and away:
-					break
-			elif "If Morning" in message:
-                                host, name, value = message.split("/")
-                                if value=="if" and self.part_of_the_day()!=self.MORNING:
-                                        return
-                                elif value=="not" and self.part_of_the_day()==self.MORNING:
-                                        break
-			elif "If Afternoon" in message:
-                                host, name, value = message.split("/")
-                                if value=="if" and self.part_of_the_day()!=self.AFTERNOON:
-					print("Breaking bad")
-                                        break
-                                elif value=="not" and self.part_of_the_day()==self.AFTERNOON:
-                                        break
-			elif "If Evening" in message:
-                                host, name, value = message.split("/")
-                                if value=="if" and self.part_of_the_day()!=self.EVENING:
-                                        break
-                                elif value=="not" and self.part_of_the_day()==self.EVENING:
-                                        break
-			elif "If Night" in message:
-                                host, name, value = message.split("/")
-                                if value=="if" and self.part_of_the_day()!=self.NIGHT:
-                                        break
-                                elif value=="not" and self.part_of_the_day()==self.NIGHT:
-                                        break
-			elif "Pause" in message:
-				host, name, value = message.split("/")			
-				time.sleep(int(value))
-			elif "Set Away" in message:
-				host, name, value = message.split("/")			
-				away = (value=="on")
-			else:
-			        result, mid = self.mos_client.publish(self.db.get_value("mostopic"), message)
-	
-			app_log.info("actioned message")
-
-
-	def part_of_the_day(self):
-		try:
-			now_mins = (Utils.get_hours()*60) + Utils.get_mins()
-
-			morning_time = self.db.get_value("morningtime")		
-			if morning_time is None:
-				Print("No value set for Morning")
-				return False
-			morning_time_value = morning_time.split(":")
-			morning_time_value_mins = (int(morning_time_value[0])*60) + int(morning_time_value[1])
-
-			afternoon_time = self.db.get_value("afternoontime")		
-			if afternoon_time is None:
-				Print("No value set for Afternoon")
-				return False
-			afternoon_time_value = afternoon_time.split(":")
-			afternoon_time_value_mins = (int(afternoon_time_value[0])*60)+int(afternoon_time_value[1])
-
-			evening_time = self.db.get_value("eveningtime")		
-			if evening_time is None:
-				Print("No value set for Evening")
-				return False
-			evening_time_value = evening_time.split(":")
-			evening_time_value_mins = (int(evening_time_value[0])*60)+int(evening_time_value[1])
-
-			night_time = self.db.get_value("nighttime")		
-			if night_time is None:
-				Print("No value set for Night")
-				return False
-			night_time_value = night_time.split(":")
-			night_time_value_mins = (int(night_time_value[0])*60)+int(night_time_value[1])
-
-			if (now_mins >= morning_time_value_mins and now_mins<afternoon_time_value_mins):
-				print("it is morning")
-				return self.MORNING
-	
-			if (now_mins >= afternoon_time_value_mins and now_mins<evening_time_value_mins):
-				print("it is afternoon")
-				return self.AFTERNOON
-	
-			if (now_mins >= evening_time_value_mins and now_mins<night_time_value_mins):
-				print("it is evening time")
-				return self.EVENING
-	
-			if (now_mins >= night_time_value_mins or now_mins<morning_time_value_mins):
-				print("it is evening time")
-				return self.NIGHT
-
-			return ""
-
-	        except Exception as e:
-        	        app_log.exception('Exception: %s', e)
-
-	def send_motion_email(self):
-		try:
-			Utils.send_email(self.db.get_value("gmailaddress"), self.db.get_value("motionaddress"), "motion", "motion detected", self.db.get_value("gmailpassword"))	
-	        except Exception as e:
-        	        app_log.exception('Exception: %s', e)
-
-	def send_event_non_dismiss_email(self):
-		try:
-			Utils.send_email(self.db.get_value("gmailaddress"), self.db.get_value("nondismissaddress"), "event", "event not dismissed within 2  minutes", self.db.get_value("gmailpassword"))
-	        except Exception as e:
-        	        app_log.exception('Exception: %s', e)
-
+		Thread(target=Utils.send_messages,args=(self.db, self.mos_client, app_log,set_name,)).start()
 
 	def trigger_action_on_motion(self):
 
@@ -676,7 +550,7 @@ class MyApp(App):
 			self.send_message_set("motionon")
 
 			if self.away:
-				Thread(target=send_motion_email,args=()).start()
+				Thread(target=Utils.send_motion_email,args=(self.db,app_log)).start()
 
 	        except Exception as e:
         	        app_log.exception('Exception: %s', e)
