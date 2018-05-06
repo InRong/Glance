@@ -45,6 +45,7 @@ import time
 import os
 import Event
 import Audio
+import os
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -361,7 +362,9 @@ class MyApp(App):
 					if message_parts[0] == self.db.get_value("name"):
 						app_log.info ("screen message, value is " + message_parts[2][-1:])
 						self.set_screen(message_parts[2][-1:]=="+")
-				
+				elif message_parts[1] == "reboot": 
+					if message_parts[0] == self.db.get_value("name"):
+						os.system('reboot -f')
 				elif message_parts[1] == "dismiss popup": 
 					self.popup.dismiss()
 
