@@ -98,7 +98,6 @@ class RPIIO(object) :
 
 		try:
 	                messageparts = str(msg.payload).split("/")
-			print(messageparts)
 
         	        if len(messageparts)==3:
 	                        #command is 1+, 2+ etc to turn high, 1-, 2- etc low

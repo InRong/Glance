@@ -88,7 +88,7 @@ class Automation(object) :
                         if(filemodifiedtime == self.file_modified_time_at_last_read): #database has not changed sonce last time we read
                                 return
 
-                        if self.db.get_value("confirmationbeep") == "on" and self.started:
+                        if self.db.get_value("confirmationbeep") == "on":
                                 audio = Audio.Audio()
                                 audio.play_beep()
 
@@ -117,7 +117,7 @@ class Automation(object) :
 				self.app_log.info("Incoming - " + str(msg.payload))
 
                                 if incoming == self.db.get_message("motionsensor"):
-                                        self.motion_value = (message_parts[2] == "on")
+                                        self.motion_value = (message_parts[2] == "on") or (message_parts[2] == "+")
        	                                if self.motion_value:
                	                                self.trigger_action_on_motion()
 

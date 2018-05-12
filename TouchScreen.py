@@ -68,7 +68,7 @@ class DataLabel(Label):
 
 class PIRImage(Image):
 	def update(self, dt):
-		if main_application.display_text[12]=="on":		
+		if main_application.display_text[12]=="on" or main_application.display_text[12]=="+":		
 			self.opacity = 1.0
 		else:
 			self.opacity = 0
@@ -307,10 +307,8 @@ class MyApp(App):
 
 			if len(message_parts)==3:
 				incoming = message_parts[0] + "/" + message_parts[1] + "/" 
-
 				if incoming == self.db.get_message("motionsensor"):
-					self.motion_value = (message_parts[2] == "on")
-
+					self.motion_value = (message_parts[2] == "on") or (message_parts[2] == "+")
 				#If it is a screen command for this host
 				elif message_parts[1] == "screen": 
 					if message_parts[0] == self.db.get_value("name"):
