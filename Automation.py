@@ -72,6 +72,8 @@ class Automation(object) :
  		        self.last_event = None
         	        self.last_mins = 99
  
+			self.away = False
+
 			self.db = DB.DB()
 			self.read_settings()
 			self.start_mosquitto()
@@ -164,7 +166,9 @@ class Automation(object) :
                                 	if message_parts[0] == self.db.get_value("name"):
                                         	os.system('reboot -f')
  
-
+                                elif "Set Away" in incoming:
+					self.away = (message_parts[2]=="on")
+					
                 except Exception as e:
                         self.app_log.exception('Exception: %s', e)
 

@@ -451,7 +451,7 @@ class MyApp(App):
 				self.display_update[digit]=time.time()
 	
 			elif selection == "@@away":
-				if away:
+				if self.away:
 					self.display_text[digit] = "Away"
 				else:
 					self.display_text[digit] = ""
