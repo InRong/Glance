@@ -28,6 +28,7 @@ import socket
 import fcntl
 import struct
 import smtplib
+from threading import Thread
 
 # Import the email modules
 from email.mime.text import MIMEText
@@ -39,7 +40,6 @@ THU = 3
 FRI = 4
 SAT = 5
 SUN = 6
-
 
 MORNING = 0
 AFTERNOON = 1
@@ -250,6 +250,8 @@ def send_email(fromemail,toemail,subject, body, passwd):
         s.sendmail(fromemail, toemail, msg.as_string())
         s.quit()
 
+def send_message_set(db, mos_client, app_log, set_name):
+	Thread(target=send_messages,args=(db, mos_client, app_log, set_name,)).start()
 
 def send_messages(db, mos_client, app_log, set_name):
 	app_log.info("set_name is .... " + set_name)
@@ -296,6 +298,7 @@ def send_messages(db, mos_client, app_log, set_name):
                         if value=="if" and part_of_the_day(db, app_log)!=NIGHT:
                                 break
                         elif value=="not" and part_of_the_day(db, app_log)==NIGHT:
+				print("Not night")
                                 break
                 elif "Pause" in message:
         	        host, name, value = message.split("/")

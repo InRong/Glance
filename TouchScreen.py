@@ -42,7 +42,6 @@ import datetime
 import Utils
 import DB
 import time
-import os
 import Event
 import Audio
 import os
@@ -219,15 +218,6 @@ class MyApp(App):
 
 		self.button_count = 0
 
-		self.light_value = 0
-		self.last_light_message = ""
-
-		self.temperature_value = 0
-		self.last_temperature_message = ""
-
-		self.humidity_value = 0
-		self.last_humidity_message = ""
-
 		self.motion_value = False
 
 		self.last_event = None
@@ -257,6 +247,11 @@ class MyApp(App):
 
 	def read_settings(self):
 		try:
+                        #check if the database has changed, if so, re-read it.
+                        filemodifiedtime = time.ctime(os.path.getmtime(self.db.get_file_path()))
+                        if(filemodifiedtime == self.file_modified_time_at_last_read): #database has not changed sonce last time we read
+                                return
+
 			if self.db.get_value("confirmationbeep") == "on" and self.started:
 				audio = Audio.Audio()
 				audio.play_beep()
@@ -313,58 +308,15 @@ class MyApp(App):
 			if len(message_parts)==3:
 				incoming = message_parts[0] + "/" + message_parts[1] + "/" 
 
-				#read the selected sensor data			
-				if incoming == self.db.get_message("lightsensor"):
-					light_value =  int(message_parts[2])
-					if light_value <= self.db.get_int_value("normallight"):
-						if self.last_light_message!="lighton":
-							self.send_message_set("lighton")
-							self.last_light_message="lighton"
-
-					elif light_value >= self.db.get_int_value("brightlight"):
-						if self.last_light_message!="lightoff":
-							self.send_message_set("lightoff")
-							self.last_light_message="lightoff"
-
-				elif incoming == self.db.get_message("temperaturesensor"):
-					temperature_value =  int(message_parts[2])
-				
-					if temperature_value <= self.db.get_int_value("cold"):
-						if self.last_temperature_message!="tempon":
-							self.send_message_set("tempon")
-							self.last_temperature_message="tempon"
-
-					elif self.temperature_value >= self.db.get_int_value("hot"):
-						if self.last_temperature_message!="tempoff":
-							self.send_message_set("tempoff")
-							self.last_temperature_message="tempoff"
-
-				elif incoming == self.db.get_message("humiditysensor"):
-					humidity_value =  int(message_parts[2])
-
-					if humidity_value <= self.db.get_int_value("dry"):
-						if self.last_humidty_message!="humidityon":
-							self.send_message_set("humidityon")
-							self.last_humidity_message="humidityon"
-
-					elif humidity_value >= self.db.get_int_value("humid"):
-						if self.last_humidity_message!="humidityoff":
-							self.send_message_set("humidityoff")
-							self.last_humidity_message="humidityoff"
-
-				elif incoming == self.db.get_message("motionsensor"):
+				if incoming == self.db.get_message("motionsensor"):
 					self.motion_value = (message_parts[2] == "on")
-					if self.motion_value:
-						self.trigger_action_on_motion()						
 
 				#If it is a screen command for this host
 				elif message_parts[1] == "screen": 
 					if message_parts[0] == self.db.get_value("name"):
 						app_log.info ("screen message, value is " + message_parts[2][-1:])
 						self.set_screen(message_parts[2][-1:]=="+")
-				elif message_parts[1] == "reboot": 
-					if message_parts[0] == self.db.get_value("name"):
-						os.system('reboot -f')
+
 				elif message_parts[1] == "dismiss popup": 
 					self.popup.dismiss()
 
@@ -434,26 +386,10 @@ class MyApp(App):
 
 	def automation1(self, dt):
 		try:
-			#check if the database has changed, if so, re-read it. 
-			filemodifiedtime = time.ctime(os.path.getmtime(self.db.get_file_path()))	
-			if(filemodifiedtime <> self.file_modified_time_at_last_read):
-				self.read_settings()
+			self.read_settings()
 
 			for x in range(1, 13):
 				self.update_display_text(x, self.db.get_value("display" + str(x)))
-
-			#Do we need to trigger a scheduled event
-			if (self.last_mins <> Utils.get_mins()): #check once a minute 
-				self.last_mins = Utils.get_mins() 
-
-			        event_list = Event.EventList()
-				next_event = event_list.get_next_event(self.db)	
-
-				if next_event.get_mins_until_event()==0: #then the event is now.
-					app_log.info("time for event")
-					app_log.info(next_event.name + "on")
-					self.send_message_set(next_event.name + "on")
-					self.last_event = next_event
 
 	        except Exception as e:
         	        app_log.exception('Exception: %s', e)
@@ -536,22 +472,6 @@ class MyApp(App):
 
 	def send_message_set(self, set_name):
 		Thread(target=Utils.send_messages,args=(self.db, self.mos_client, app_log,set_name,)).start()
-
-	def trigger_action_on_motion(self):
-
-		try:
-			if (time.time()-self.last_pir_time <=8): #only fire this once per high
-				return; 
- 
-			self.last_pir_time = time.time()
-
-			self.send_message_set("motionon")
-
-			if self.away:
-				Thread(target=Utils.send_motion_email,args=(self.db,app_log)).start()
-
-	        except Exception as e:
-        	        app_log.exception('Exception: %s', e)
 
 	#Switch the screen on or off.
 	def set_screen(self,desired_state):

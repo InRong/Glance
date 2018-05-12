@@ -41,6 +41,7 @@ import AlphaVantage
 import HUE
 import HS100
 import Sounds
+import Automation
 
 import YahooWeather
 import HKWeather
@@ -119,6 +120,9 @@ class Launcher(object):
 	def rpiio(self):
 		RPIIO.run_program(self.app_log)
 
+	def automation(self):
+		Automation.run_program(self.app_log)
+
 	def process_loop(self):
                 try:
 			while(True):	
@@ -131,6 +135,9 @@ class Launcher(object):
 			if (self.hostname == "bedroomtouch"):
        				self.touch_screen_thread = Thread(target=self.touch_screen,args=())
 				self.touch_screen_thread.start()
+				
+       				self.automation_thread = Thread(target=self.automation,args=())
+				self.automation_thread.start()
 				
         			self.google_calendar_thread = Thread(target=self.google_calendar,args=())
 				self.google_calendar_thread.start()
