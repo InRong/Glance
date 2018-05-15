@@ -173,7 +173,7 @@ class Automation(object) :
                         self.app_log.exception('Exception: %s', e)
 
         def send_message_set(self, set_name):
-                Thread(target=Utils.send_messages,args=(self.db, self.mos_client, self.app_log, set_name,)).start()
+                Thread(target=Utils.send_messages,args=(self.db, self.mos_client, self.app_log, self.away, set_name,)).start()
 
 	def start_mosquitto(self):
 		try:

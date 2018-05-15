@@ -125,7 +125,6 @@ class MainScreen(Screen):
 
 		#Set up the screen labels - create them, setting the font, colour, position and size from the database. 
 		for label_loop in range(1, 12):
-			app_log.info("label loop - " + str(label_loop))
 			label_values = main_application.db.get_value("label" + str(label_loop)).split("^")
 			data_label[label_loop] = DataLabel(id=str(label_loop), font_size=label_values[0], pos_hint={'x':float(label_values[1]), 'y':float(label_values[2])})
     			data_label[label_loop].color = [float(label_values[3]),float(label_values[4]),float(label_values[5]),float(label_values[6])]
@@ -307,13 +306,18 @@ class MyApp(App):
 
 			if len(message_parts)==3:
 				incoming = message_parts[0] + "/" + message_parts[1] + "/" 
+
 				if incoming == self.db.get_message("motionsensor"):
 					self.motion_value = (message_parts[2] == "on") or (message_parts[2] == "+")
+
 				#If it is a screen command for this host
 				elif message_parts[1] == "screen": 
 					if message_parts[0] == self.db.get_value("name"):
 						app_log.info ("screen message, value is " + message_parts[2][-1:])
 						self.set_screen(message_parts[2][-1:]=="+")
+
+                                elif "Set Away" in incoming:
+                                        self.away = (message_parts[2]=="on")
 
 				elif message_parts[1] == "dismiss popup": 
 					self.popup.dismiss()
@@ -469,7 +473,11 @@ class MyApp(App):
 
 
 	def send_message_set(self, set_name):
-		Thread(target=Utils.send_messages,args=(self.db, self.mos_client, app_log,set_name,)).start()
+		global app_log
+		try:
+	                Thread(target=Utils.send_messages,args=(self.db, self.mos_client, app_log, self.away, set_name,)).start()
+	        except Exception as e:
+        	        app_log.exception('Exception: %s', e)
 
 	#Switch the screen on or off.
 	def set_screen(self,desired_state):

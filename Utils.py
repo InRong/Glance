@@ -250,10 +250,10 @@ def send_email(fromemail,toemail,subject, body, passwd):
         s.sendmail(fromemail, toemail, msg.as_string())
         s.quit()
 
-def send_message_set(db, mos_client, app_log, set_name):
-	Thread(target=send_messages,args=(db, mos_client, app_log, set_name,)).start()
+def send_message_set(db, mos_client, app_log, away, set_name):
+	Thread(target=send_messages,args=(db, mos_client, app_log, away, set_name,)).start()
 
-def send_messages(db, mos_client, app_log, set_name):
+def send_messages(db, mos_client, app_log, away, set_name):
 	app_log.info("set_name is .... " + set_name)
 
         for cmd_loop in range(0, 9):
@@ -303,10 +303,12 @@ def send_messages(db, mos_client, app_log, set_name):
                 elif "Pause" in message:
         	        host, name, value = message.split("/")
                         time.sleep(int(value))
-                elif "Set Away" in message:
-                        host, name, value = message.split("/")
-                        away = (value=="on")
                 else:
+
+                	if "Set Away" in message:
+                        	host, name, value = message.split("/")
+	                        away = (value=="on")
+
                         result, mid = mos_client.publish(db.get_value("mostopic"), message)
 
 	app_log.info("actioned message")
