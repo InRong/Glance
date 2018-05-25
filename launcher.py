@@ -171,6 +171,9 @@ class Launcher(object):
        				self.touch_screen_thread = Thread(target=self.touch_screen,args=())
 				self.touch_screen_thread.start()
 
+       				self.automation_thread = Thread(target=self.automation,args=())
+				self.automation_thread.start()
+
       				self.sensor_board_2_thread = Thread(target=self.sensor_board_2,args=())
 				self.sensor_board_2_thread.start()
 
@@ -190,6 +193,9 @@ class Launcher(object):
 
        				self.touch_screen_thread = Thread(target=self.touch_screen,args=())
 				self.touch_screen_thread.start()
+
+       				self.automation_thread = Thread(target=self.automation,args=())
+				self.automation_thread.start()
 
       				self.sensor_board_thread = Thread(target=self.sensor_board,args=())
 				self.sensor_board_thread.start()
