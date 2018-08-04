@@ -30,22 +30,21 @@ from logging.handlers import RotatingFileHandler
 #import DB
 
 import TouchScreen
-import GoogleCalendar
-import SensorBoard
-import SensorBoard2
-import GY30
-import BMP180
-import DHT12
+import GoogleCalendarPlus
+#import SensorBoard
+#import SensorBoard2
+#import GY30
+#import BMP180
+#import DHT12
 import WAQI
 import AlphaVantage
 import HUE
-import HS100
+#import HS100
 import Sounds
 import Automation
 
 import YahooWeather
-import HKWeather
-import Transport
+import UKWeather
 import RPIIO
 
 class Launcher(object):
@@ -108,8 +107,8 @@ class Launcher(object):
 	def yahoo_weather(self):
 		YahooWeather.run_program(self.app_log)
 
-	def hk_weather(self):
-		HKWeather.run_program(self.app_log)
+	def uk_weather(self):
+		UKWeather.run_program(self.app_log)
 
 	def sounds(self):
 		Sounds.run_program(self.app_log)

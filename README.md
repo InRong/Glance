@@ -1,5 +1,10 @@
 # glance
 
+# I have forked this project from the HK centric version of peterhk1 to produce another regional specific version.. This time UK.
+# I hope to make it more generic in the future, but am going to make it work for me first....
+# I intend to keep up to date with any changes PeterJ makes to his, and incorporate anything useful into here, but please feel to nudge me if I miss anything.
+
+
 Installation Instructions
 
 1.	Download the latest Kivypie  and install to SD card. Insert into RPI, connect to the network and powerup! 
@@ -73,10 +78,6 @@ After test, delete the test file
 
 sudo rm /var/www/html/index.html
 
-reboot the Raspberry Pi
-
-sudo reboot
-
 
 6.	Copy the python source files and web source files to the /home/sysop/Glance and /var/www/html/GlanceWeb folders respectively. Also copy Clock, Music, Pictures and Inspiration sub-folders and contents and create the logs subfolder.
 
@@ -84,8 +85,10 @@ a)	Install source modules and dependencies.
 
 From /home/sysop/
 
-git clone https://github.com/peterjhk1/Glance.git
+git clone https://github.com/InRong/Glance.git
 
+Create the logs directory.
+mkdir Glance/logs
 
 b)	Install web pages and database
 
@@ -100,7 +103,7 @@ Set the pi hostname to ‘bedroomtouch’
 Set the timezone as required
 Select ‘wait for network at boot’
 Activate I2C (under interface options)
-
+reboot to set the hostname
 
 8.	Install ALL the required dependencies
 
@@ -177,8 +180,15 @@ insert into messages (host, name, value, description, display,action) values (''
 insert into messages (host, name, value, description, display,action) values ('','If Evening','if','If Evening','0','1');
 insert into messages (host, name, value, description, display,action) values ('','If Night','if','If Night','0','1');
 
+Also Note that there is a timezone in the DB. I am not yet sure of the consequences of leaving it, so I recommend changing it to your local
+e.g.:
+sqlite> select * from settings where setting='pytztimezone';
+1446|pytztimezone|Asia/Hong_Kong
 
-Note that a restart may be necessary after the database update. 
+update settings set value='Europe/London' where setting='pytztimezone';
+
+
+Note that a restart may be necessary after the database update (if you have Glance running that is). 
 
 10.	To make the system autorun at boot, 
 sudo nano /etc/rc.local
@@ -188,4 +198,13 @@ sudo python launcher.py &
 
 	
 
+Troubleshooting
+==============
 
+Google Calendar:
+
+ If you get the following in the GoogleCalendar.log file
+
+HttpError: <HttpError 403 when requesting https://www.googleapis.com/calendar/v3/users/me/calendarList?alt=json returned "Project xxxxxxxxxx is not found and cannot be used for API calls. If it is recently created, enable Calendar API by visiting https://console.developers.google.com/apis/api/calendar.googleapis.com/overview?project=xxxxxxxxxx then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.">
+
+ Then paste the enclosed URL into a browser, click on Library on the left, and find the Google Calendar API. Click this, and then select Enable. Restart the google calendar element once that ha completed.
