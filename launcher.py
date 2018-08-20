@@ -30,7 +30,7 @@ from logging.handlers import RotatingFileHandler
 #import DB
 
 import TouchScreen
-import GoogleCalendarPlus
+#import GoogleCalendarPlus
 #import SensorBoard
 #import SensorBoard2
 #import GY30
@@ -75,7 +75,10 @@ class Launcher(object):
 		TouchScreen.run_program(self.app_log)
 
 	def google_calendar(self):
-		GoogleCalendar.run_program(self.app_log)
+		GoogleCalendarPlus.run_program(self.app_log)
+
+	#def google_calendar(self):
+	#	GoogleCalendar.run_program(self.app_log)
 
 	def sensor_board(self):
 		SensorBoard.run_program(self.app_log)
@@ -156,8 +159,8 @@ class Launcher(object):
         			self.yahoo_weather_thread = Thread(target=self.yahoo_weather,args=())
 				self.yahoo_weather_thread.start()
 
-        			self.hk_weather_thread = Thread(target=self.hk_weather,args=())
-				self.hk_weather_thread.start()
+        			self.uk_weather_thread = Thread(target=self.hk_weather,args=())
+				self.uk_weather_thread.start()
 
         			self.rpiio_thread = Thread(target=self.rpiio,args=())
 				self.rpiio_thread.start()
