@@ -30,15 +30,15 @@ from logging.handlers import RotatingFileHandler
 #import DB
 
 import TouchScreen
-#import GoogleCalendarPlus
+import GoogleCalendarPlus
 #import SensorBoard
 #import SensorBoard2
 #import GY30
 #import BMP180
 #import DHT12
-import WAQI
-import AlphaVantage
-import HUE
+#import WAQI
+#import AlphaVantage
+#import HUE
 #import HS100
 import Sounds
 import Automation
@@ -159,7 +159,7 @@ class Launcher(object):
         			self.yahoo_weather_thread = Thread(target=self.yahoo_weather,args=())
 				self.yahoo_weather_thread.start()
 
-        			self.uk_weather_thread = Thread(target=self.hk_weather,args=())
+        			self.uk_weather_thread = Thread(target=self.uk_weather,args=())
 				self.uk_weather_thread.start()
 
         			self.rpiio_thread = Thread(target=self.rpiio,args=())

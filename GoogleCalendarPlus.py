@@ -83,7 +83,7 @@ class Calendar(object):
 
                         self.log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
 
-                        self.logFile = 'logs/GoogleCalendar.log'
+                        self.logFile = 'logs/GoogleCalendarPlus.log'
 
                         self.my_handler = RotatingFileHandler(self.logFile, mode='a', maxBytes=5*1024*1024, backupCount=1, encoding=None, delay=0)
                         self.my_handler.setFormatter(self.log_formatter)
@@ -100,21 +100,30 @@ class Calendar(object):
                 self._db = DB.DB()
                 self._db.load_settings()
 
-                self.months=['' for i in range(12)]
-                for month in range (1,12):
+                self.months=['' for i in range(1,24)]
+                for month in range (1,13):
+                    #self.app_log.info (month)
                     NextMonth=datetime.datetime(2018,month,1,1,1,1)
                     self.months[month]=NextMonth.strftime ('%b')
+                    #self.app_log.info (self.months[month])
 
 		x = 1
 		self.cals={}
+		self.calsPref={}
 		nextCal="Calendar"+str(x)
 		while (self._db.get_value(nextCal)):
 		  NextCalTag=nextCal+'Tag'
+		  NextCalPrefix=nextCal+'Prefix'
+                  #print (NextCalTag);
+                  #print (NextCalPrefix);
 		  if self._db.get_value(NextCalTag):
 		     self.cals[self._db.get_value(nextCal)]=self._db.get_value(NextCalTag)
+		     if self._db.get_value(NextCalTag):
+		        self.calsPref[self._db.get_value(NextCalTag)]=self._db.get_value(NextCalPrefix)
 		  x = x + 1
                   nextCal="Calendar"+str(x)
                 #pprint (self.cals)
+                #pprint (self.calsPref)
 
                 self.start_mosquito()
                 self.process_loop()
@@ -250,6 +259,8 @@ class Calendar(object):
 	          for event in events:
         	      start = event['start'].get('dateTime', event['start'].get('date'))
 		      next_event = self.process_text(start, event['summary'])
+                      if (ThisCal in self.calsPref):
+                         next_event = self.calsPref[ThisCal]+next_event
 		      self.broadcast_send(ThisCal + str(x), next_event)
  
 		      if x == 1:
@@ -304,10 +315,14 @@ class Calendar(object):
 	    	out_text = out_text.replace(this_time.strftime("%m-%d"),this_time.strftime("%a"))
 
             if (base == out_text):   # It has not been adjusted
+                #self.app_log.info (out_text)
                 month=out_text[0:2]
+                #self.app_log.info (month)
+                #self.app_log.info (self.months[int(month)])
                 out_text=self.months[int(month)] + out_text[2:]
 
             out_text = out_text + " " + summary
+            #out_text = out_text + " " + prefix + summary
 
 	    return out_text	
 
