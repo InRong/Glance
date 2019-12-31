@@ -20,7 +20,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import urllib2, urllib, json
+import urllib.request, urllib.error, urllib.parse, urllib.request, urllib.parse, urllib.error, json
 import time
 import datetime
 import feedparser
@@ -53,8 +53,8 @@ class HKWeather(object):
                 else:
                         self.app_log = main_app_log
 
-		self._humidity = ""
-		self._temperature = ""
+                self._humidity = ""
+                self._temperature = ""
 
                 self._db = DB.DB()
                 self._db.load_settings()
@@ -62,30 +62,30 @@ class HKWeather(object):
                 self.start_mos()
                 self.process_loop()
 
-	def get(self):
-		self._humidity = ""
-		self._temperature = ""
-		targeturl = 'http://rss.weather.gov.hk/rss/CurrentWeather.xml' 
+        def get(self):
+                self._humidity = ""
+                self._temperature = ""
+                targeturl = 'http://rss.weather.gov.hk/rss/CurrentWeather.xml' 
 
-		d = feedparser.parse(targeturl) 
+                d = feedparser.parse(targeturl) 
 
-		if len(d.entries) > 0:
-			desc =  d.entries[0].description.split('Air temperature : ')
-			self._temperature =  desc[1][:2].strip()
-			desc =  d.entries[0].description.split(' Relative Humidity : ')
-			self._humidity =  desc[1][:3].strip()
+                if len(d.entries) > 0:
+                        desc =  d.entries[0].description.split('Air temperature : ')
+                        self._temperature =  desc[1][:2].strip()
+                        desc =  d.entries[0].description.split(' Relative Humidity : ')
+                        self._humidity =  desc[1][:3].strip()
 
-			logging.info(self._humidity + "%")
-			logging.info(self._temperature + "C")
-		else:
-			logging.info("No entries returned")
+                        logging.info(self._humidity + "%")
+                        logging.info(self._temperature + "C")
+                else:
+                        logging.info("No entries returned")
 
-	def getunits(self, which_units):
-		if which_units == "temperature":
-			return (u'\N{DEGREE SIGN}' + 'C')
+        def getunits(self, which_units):
+                if which_units == "temperature":
+                        return ('\N{DEGREE SIGN}' + 'C')
 
-		if which_units == "humidity":
-			return ("%")
+                if which_units == "humidity":
+                        return ("%")
 
         def on_connect(self, mosclient, userdata, flags, rc):
                 self.app_log.info("Subscribing to topic: " + self._db.get_value("mostopic"))
@@ -112,33 +112,33 @@ class HKWeather(object):
                 self.mos_client.loop_start()
 
 
-	def process_loop(self):
-		x = 10
-		while(1):
-			try:
-				#Data is refreshed every 10 minutes
-				if x == 10:
-					x = 0
-					self.get()
-				else:
-					x = x + 1
+        def process_loop(self):
+                x = 10
+                while(1):
+                        try:
+                                #Data is refreshed every 10 minutes
+                                if x == 10:
+                                        x = 0
+                                        self.get()
+                                else:
+                                        x = x + 1
 
-				#This is broadcast every minute, if valid
-				if len(self._temperature) > 0:
+                                #This is broadcast every minute, if valid
+                                if len(self._temperature) > 0:
                                         message =  self._db.get_value("name") + "/HK Weather/Outside: " + self._temperature + self.getunits("temperature") + " " + self._humidity +  self.getunits("humidity")
                                         self.mos_client.publish(self._db.get_value("mostopic"), message)
                                         self.app_log.info("Sent - " + message)
                                 else:
                                         self.app_log.info("Nothing Sent")
-			except Exception as e:
-                        	logging.exception('Exception: %s', e)
-			finally:
-				time.sleep(SLEEP_TIME)
+                        except Exception as e:
+                                logging.exception('Exception: %s', e)
+                        finally:
+                                time.sleep(SLEEP_TIME)
 
 
 def run_program(main_app_log):
-	HKWeather(main_app_log)
+        HKWeather(main_app_log)
 
 if __name__ == '__main__':
-	run_program(None)
+        run_program(None)
 

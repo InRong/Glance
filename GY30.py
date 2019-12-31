@@ -62,7 +62,7 @@ class GY30(object):
                 else:
                         self.app_log = main_app_log
 
-		self.light_value = 0
+                self.light_value = 0
 
                 self._db = DB.DB()
                 self._db.load_settings()
@@ -70,16 +70,16 @@ class GY30(object):
                 self.start_mosquito()
                 self.process_loop()
 
-	def get(self, addr=DEVICE):
-		try:
-			self._bus = smbus.SMBus(1)  
-			data = self._bus.read_i2c_block_data(addr,ONE_TIME_HIGH_RES_MODE_1)
-			self.light_value = int ((data[1] + (256 * data[0])) / 1.2)
-	        except Exception as e:
-	                app_log.exception('Exception: %s', e)
+        def get(self, addr=DEVICE):
+                try:
+                        self._bus = smbus.SMBus(1)  
+                        data = self._bus.read_i2c_block_data(addr,ONE_TIME_HIGH_RES_MODE_1)
+                        self.light_value = int ((data[1] + (256 * data[0])) / 1.2)
+                except Exception as e:
+                        app_log.exception('Exception: %s', e)
 
 
-	def on_connect(self, mosclient, userdata, flags, rc):
+        def on_connect(self, mosclient, userdata, flags, rc):
                 self.app_log.info("Subscribing to topic: " + self._db.get_value("mostopic"))
                 mosclient.subscribe(self._db.get_value("mostopic"))
 
@@ -109,7 +109,7 @@ class GY30(object):
                 self.mos_client.loop_start()
 
 
-	def broadcast_send(self, data_item, value):
+        def broadcast_send(self, data_item, value):
                 result = 0
                 mid = 0
 
@@ -135,32 +135,32 @@ class GY30(object):
                 except Exception as e:
                         self.app_log.exception('Exception: %s', e)
 
-	def process_loop(self):
-		x = 0
-		old_value = 0
+        def process_loop(self):
+                x = 0
+                old_value = 0
 
-		while(1):
-			try:
-				self.get()	
-				message = str(self.light_value)	
-				if old_value != self.light_value or x == 0:
-					self.broadcast_send('light', message)
+                while(1):
+                        try:
+                                self.get()      
+                                message = str(self.light_value) 
+                                if old_value != self.light_value or x == 0:
+                                        self.broadcast_send('light', message)
 
-				old_value = self.light_value
+                                old_value = self.light_value
 
-				logging.info(message)
-             			if x < 10:
-					x = x + 1
-				else:
-					x = 0
+                                logging.info(message)
+                                if x < 10:
+                                        x = x + 1
+                                else:
+                                        x = 0
 
-			except Exception as e:	
-        	                app_log.exception('Exception: %s', e)
+                        except Exception as e:  
+                                app_log.exception('Exception: %s', e)
 
-			finally:
-				time.sleep(SLEEP_TIME)
+                        finally:
+                                time.sleep(SLEEP_TIME)
 def run_program(main_app_log):
         GY30(main_app_log)
 
 if __name__ == "__main__":
-	run_program(None)
+        run_program(None)

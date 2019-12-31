@@ -52,9 +52,9 @@ class BMP180(object) :
                         self.app_log = main_app_log
 
                 self._sensor = BMP085.BMP085()
-		self._temperature = ""
-		self._pressure = ""
-		self._altitude = ""
+                self._temperature = ""
+                self._pressure = ""
+                self._altitude = ""
 
                 self._db = DB.DB()
                 self._db.load_settings()
@@ -62,14 +62,14 @@ class BMP180(object) :
                 self.start_mos()
                 self.process_loop()
 
-	def get(self):
- 		self._temperature = str(int(self._sensor.read_temperature()))
-		self._pressure = str(int(self._sensor.read_pressure()))
-		self._altitude = '{0:0.1f}'.format(self._sensor.read_altitude())
+        def get(self):
+                self._temperature = str(int(self._sensor.read_temperature()))
+                self._pressure = str(int(self._sensor.read_pressure()))
+                self._altitude = '{0:0.1f}'.format(self._sensor.read_altitude())
 
         def getunits(self, which_units):
                 if which_units == "temperature":
-                        return (u'\N{DEGREE SIGN}' + 'C')
+                        return ('\N{DEGREE SIGN}' + 'C')
 
                 if which_units == "pressure":
                         return ("Pa")
@@ -77,20 +77,20 @@ class BMP180(object) :
                 if which_units == "altitude":
                         return ("m")
 
-	def process_loop(self):
-		while(1):
-                	try:
-                        	self.get()
-                        	if len(self._temperature)>0:
-                                	self.broadcast_send("temperature from BMP180", "Inside: " + self._temperature + self.getunits("temperature"))
-                                	self.broadcast_send("pressure from BMP180", self._pressure + self.getunits("pressure"))
-                                	self.broadcast_send("altitude from BMP180", self._altitude + self.getunits("altitude"))
-	                except Exception as e:
-        	                self.app_log.exception('Exception: %s', e)
-                	finally:
-                        	time.sleep(SLEEP_TIME)
+        def process_loop(self):
+                while(1):
+                        try:
+                                self.get()
+                                if len(self._temperature)>0:
+                                        self.broadcast_send("temperature from BMP180", "Inside: " + self._temperature + self.getunits("temperature"))
+                                        self.broadcast_send("pressure from BMP180", self._pressure + self.getunits("pressure"))
+                                        self.broadcast_send("altitude from BMP180", self._altitude + self.getunits("altitude"))
+                        except Exception as e:
+                                self.app_log.exception('Exception: %s', e)
+                        finally:
+                                time.sleep(SLEEP_TIME)
 
-	def on_connect(self, mosclient, userdata, flags, rc):
+        def on_connect(self, mosclient, userdata, flags, rc):
                 self.app_log.info("Subscribing to topic: " + self._db.get_value("mostopic"))
                 mosclient.subscribe(self._db.get_value("mostopic"))
 
@@ -148,7 +148,7 @@ def run_program(main_app_log):
         BMP180(main_app_log)
 
 if __name__=="__main__":
-	BMP180(None)
+        BMP180(None)
 
 
 

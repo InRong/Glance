@@ -30,15 +30,15 @@ from logging.handlers import RotatingFileHandler
 #import DB
 
 import TouchScreen
-#import GoogleCalendarPlus
+import GoogleCalendarPlus
 #import SensorBoard
 #import SensorBoard2
 #import GY30
 #import BMP180
 #import DHT12
-import WAQI
-import AlphaVantage
-import HUE
+#import WAQI
+#import AlphaVantage
+#import HUE
 #import HS100
 import Sounds
 import Automation
@@ -51,7 +51,7 @@ class Launcher(object):
 
         def __init__(self):
 
-		self.hostname = socket.gethostname().lower()
+                self.hostname = socket.gethostname().lower()
 
                 self.log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
 
@@ -66,161 +66,161 @@ class Launcher(object):
 
                 self.app_log.addHandler(self.my_handler)
 
-		self.start_threads()
+                self.start_threads()
 
                 self.process_loop()
 
 
-	def touch_screen(self):
-		TouchScreen.run_program(self.app_log)
+        def touch_screen(self):
+                TouchScreen.run_program(self.app_log)
 
-	def google_calendar(self):
-		GoogleCalendarPlus.run_program(self.app_log)
+        def google_calendar(self):
+                GoogleCalendarPlus.run_program(self.app_log)
 
-	#def google_calendar(self):
-	#	GoogleCalendar.run_program(self.app_log)
+        #def google_calendar(self):
+        #       GoogleCalendar.run_program(self.app_log)
 
-	def sensor_board(self):
-		SensorBoard.run_program(self.app_log)
+        def sensor_board(self):
+                SensorBoard.run_program(self.app_log)
 
-	def sensor_board_2(self):
-		SensorBoard2.run_program(self.app_log)
+        def sensor_board_2(self):
+                SensorBoard2.run_program(self.app_log)
 
-	def gy30(self):
-		GY30.run_program(self.app_log)
+        def gy30(self):
+                GY30.run_program(self.app_log)
 
-	def bmp180(self):
-		BMP180.run_program(self.app_log)
+        def bmp180(self):
+                BMP180.run_program(self.app_log)
 
-	def dht12(self):
-		DHT12.run_program(self.app_log)
+        def dht12(self):
+                DHT12.run_program(self.app_log)
 
-	def waqi(self):
-		WAQI.run_program(self.app_log)
+        def waqi(self):
+                WAQI.run_program(self.app_log)
 
-	def alpha_vantage(self):
-		AlphaVantage.run_program(self.app_log)
+        def alpha_vantage(self):
+                AlphaVantage.run_program(self.app_log)
 
-	def hue(self):
-		HUE.run_program(self.app_log)
+        def hue(self):
+                HUE.run_program(self.app_log)
 
-	def hs100(self):
-		HS100.run_program(self.app_log)
+        def hs100(self):
+                HS100.run_program(self.app_log)
 
-	def yahoo_weather(self):
-		YahooWeather.run_program(self.app_log)
+        def yahoo_weather(self):
+                YahooWeather.run_program(self.app_log)
 
-	def uk_weather(self):
-		UKWeather.run_program(self.app_log)
+        def uk_weather(self):
+                UKWeather.run_program(self.app_log)
 
-	def sounds(self):
-		Sounds.run_program(self.app_log)
+        def sounds(self):
+                Sounds.run_program(self.app_log)
 
-	def transport(self):
-		Transport.run_program(self.app_log)
+        def transport(self):
+                Transport.run_program(self.app_log)
 
-	def rpiio(self):
-		RPIIO.run_program(self.app_log)
+        def rpiio(self):
+                RPIIO.run_program(self.app_log)
 
-	def automation(self):
-		Automation.run_program(self.app_log)
+        def automation(self):
+                Automation.run_program(self.app_log)
 
-	def process_loop(self):
+        def process_loop(self):
                 try:
-			while(True):	
-				time.sleep(1)
-		except Exception as e:
-	                self.app_log.exception('Exception: %s', e)
+                        while(True):    
+                                time.sleep(1)
+                except Exception as e:
+                        self.app_log.exception('Exception: %s', e)
 
-	def start_threads(self):
+        def start_threads(self):
                 try:
-			if (self.hostname == "bedroomtouch"):
-       				self.touch_screen_thread = Thread(target=self.touch_screen,args=())
-				self.touch_screen_thread.start()
-				
-       				self.automation_thread = Thread(target=self.automation,args=())
-				self.automation_thread.start()
-				
-        			self.google_calendar_thread = Thread(target=self.google_calendar,args=())
-				self.google_calendar_thread.start()
+                        if (self.hostname == "bedroomtouch"):
+                                self.touch_screen_thread = Thread(target=self.touch_screen,args=())
+                                self.touch_screen_thread.start()
+                                
+                                self.automation_thread = Thread(target=self.automation,args=())
+                                self.automation_thread.start()
+                                
+                                self.google_calendar_thread = Thread(target=self.google_calendar,args=())
+                                self.google_calendar_thread.start()
 
-        			self.waqi_thread = Thread(target=self.waqi,args=())
-				self.waqi_thread.start()
+                                self.waqi_thread = Thread(target=self.waqi,args=())
+                                self.waqi_thread.start()
 
-        			self.alpha_vantage_thread = Thread(target=self.alpha_vantage,args=())
-				self.alpha_vantage_thread.start()
+                                self.alpha_vantage_thread = Thread(target=self.alpha_vantage,args=())
+                                self.alpha_vantage_thread.start()
 
-        			self.hue_thread = Thread(target=self.hue,args=())
-				self.hue_thread.start()
+                                self.hue_thread = Thread(target=self.hue,args=())
+                                self.hue_thread.start()
 
-        			self.hs100_thread = Thread(target=self.hs100,args=())
-				self.hs100_thread.start()
+                                self.hs100_thread = Thread(target=self.hs100,args=())
+                                self.hs100_thread.start()
 
-        			self.yahoo_weather_thread = Thread(target=self.yahoo_weather,args=())
-				self.yahoo_weather_thread.start()
+                                self.yahoo_weather_thread = Thread(target=self.yahoo_weather,args=())
+                                self.yahoo_weather_thread.start()
 
-        			self.uk_weather_thread = Thread(target=self.hk_weather,args=())
-				self.uk_weather_thread.start()
+                                self.uk_weather_thread = Thread(target=self.uk_weather,args=())
+                                self.uk_weather_thread.start()
 
-        			self.rpiio_thread = Thread(target=self.rpiio,args=())
-				self.rpiio_thread.start()
+                                self.rpiio_thread = Thread(target=self.rpiio,args=())
+                                self.rpiio_thread.start()
 
-        			self.transport_thread = Thread(target=self.transport,args=())
-				self.transport_thread.start()
+                                self.transport_thread = Thread(target=self.transport,args=())
+                                self.transport_thread.start()
 
-			elif (self.hostname == "bedroomtouch2"):
+                        elif (self.hostname == "bedroomtouch2"):
 
-       				self.touch_screen_thread = Thread(target=self.touch_screen,args=())
-				self.touch_screen_thread.start()
+                                self.touch_screen_thread = Thread(target=self.touch_screen,args=())
+                                self.touch_screen_thread.start()
 
-       				self.automation_thread = Thread(target=self.automation,args=())
-				self.automation_thread.start()
+                                self.automation_thread = Thread(target=self.automation,args=())
+                                self.automation_thread.start()
 
-      				self.sensor_board_2_thread = Thread(target=self.sensor_board_2,args=())
-				self.sensor_board_2_thread.start()
+                                self.sensor_board_2_thread = Thread(target=self.sensor_board_2,args=())
+                                self.sensor_board_2_thread.start()
 
-	       			self.gy30_thread = Thread(target=self.gy30,args=())
-				self.gy30_thread.start()
+                                self.gy30_thread = Thread(target=self.gy30,args=())
+                                self.gy30_thread.start()
 
-       				self.bmp180_thread = Thread(target=self.bmp180,args=())
-				self.bmp180_thread.start()
+                                self.bmp180_thread = Thread(target=self.bmp180,args=())
+                                self.bmp180_thread.start()
 
-	       			self.dht12_thread = Thread(target=self.dht12,args=())
-				self.dht12_thread.start()
+                                self.dht12_thread = Thread(target=self.dht12,args=())
+                                self.dht12_thread.start()
 
-	       			self.sounds_thread = Thread(target=self.sounds,args=())
-				self.sounds_thread.start()
+                                self.sounds_thread = Thread(target=self.sounds,args=())
+                                self.sounds_thread.start()
 
-			elif (self.hostname == "livingroom"):
+                        elif (self.hostname == "livingroom"):
 
-       				self.touch_screen_thread = Thread(target=self.touch_screen,args=())
-				self.touch_screen_thread.start()
+                                self.touch_screen_thread = Thread(target=self.touch_screen,args=())
+                                self.touch_screen_thread.start()
 
-       				self.automation_thread = Thread(target=self.automation,args=())
-				self.automation_thread.start()
+                                self.automation_thread = Thread(target=self.automation,args=())
+                                self.automation_thread.start()
 
-      				self.sensor_board_thread = Thread(target=self.sensor_board,args=())
-				self.sensor_board_thread.start()
+                                self.sensor_board_thread = Thread(target=self.sensor_board,args=())
+                                self.sensor_board_thread.start()
 
-	       			self.gy30_thread = Thread(target=self.gy30,args=())
-				self.gy30_thread.start()
+                                self.gy30_thread = Thread(target=self.gy30,args=())
+                                self.gy30_thread.start()
 
-       				self.bmp180_thread = Thread(target=self.bmp180,args=())
-				self.bmp180_thread.start()
+                                self.bmp180_thread = Thread(target=self.bmp180,args=())
+                                self.bmp180_thread.start()
 
-	       			self.dht12_thread = Thread(target=self.dht12,args=())
-				self.dht12_thread.start()
-			else:
-				print "No processes included for Hostname " + self.hostname
+                                self.dht12_thread = Thread(target=self.dht12,args=())
+                                self.dht12_thread.start()
+                        else:
+                                print(("No processes included for Hostname " + self.hostname))
 
 
 
-		except Exception as e:
-	                self.app_log.exception('Exception: %s', e)
+                except Exception as e:
+                        self.app_log.exception('Exception: %s', e)
 
 
 
 if __name__ == '__main__':
-	launcher = Launcher()
+        launcher = Launcher()
 
 

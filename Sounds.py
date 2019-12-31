@@ -63,24 +63,24 @@ class Sounds(object) :
                 self.start_mos()
                 self.process_loop()
 
-	def on_connect(self, mosclient, userdata, flags, rc):
-               	self.app_log.info("Subscribing to topic: " + self._db.get_value("mostopic"))
-               	mosclient.subscribe(self._db.get_value("mostopic"))
+        def on_connect(self, mosclient, userdata, flags, rc):
+                self.app_log.info("Subscribing to topic: " + self._db.get_value("mostopic"))
+                mosclient.subscribe(self._db.get_value("mostopic"))
 
-	def on_message(self, mosclient, userdata, msg):
-               	messageparts = str(msg.payload).split("/")
-               	if len(messageparts)==3 and messageparts[1] == "Sound":
-			full_command =  messageparts[2]
-	               	self.app_log.info("Message received on mqtt: " + full_command)
-		  	if  messageparts[2] == "time":
-				audio = Audio.Audio()
-			        audio.say_time("12")
-		  	elif  messageparts[2] == "morning+":
-				audio = Audio.Audio()
-			        audio.say_good_greeting()
-		  	elif  messageparts[2] == "inspiration":
-				audio = Audio.Audio()
-			        audio.say_inspiration()
+        def on_message(self, mosclient, userdata, msg):
+                messageparts = str(msg.payload).split("/")
+                if len(messageparts)==3 and messageparts[1] == "Sound":
+                        full_command =  messageparts[2]
+                        self.app_log.info("Message received on mqtt: " + full_command)
+                        if  messageparts[2] == "time":
+                                audio = Audio.Audio()
+                                audio.say_time("12")
+                        elif  messageparts[2] == "morning+":
+                                audio = Audio.Audio()
+                                audio.say_good_greeting()
+                        elif  messageparts[2] == "inspiration":
+                                audio = Audio.Audio()
+                                audio.say_inspiration()
 
         def on_disconnect(client, userdata, rc):
             if rc != 0:
@@ -89,24 +89,24 @@ class Sounds(object) :
         def on_publish(self, client, userdata, mid):
                 self.app_log.info("on_publish - published " + str(mid))
 
-	def start_mos(self):
-       		self.mos_client = mqtt.Client()
-               	self.mos_client.on_connect = self.on_connect
-               	self.mos_client.on_message = self.on_message
+        def start_mos(self):
+                self.mos_client = mqtt.Client()
+                self.mos_client.on_connect = self.on_connect
+                self.mos_client.on_message = self.on_message
                 self.mos_client.on_disconnect = self.on_disconnect
                 self.mos_client.on_publish = self.on_publish
 
-               	if len(self._db.get_value("mospassword"))>0:
-                	self.mos_client.username_pw_set(self._db.get_value("mosusername"),self._db.get_value("mospassword"))
+                if len(self._db.get_value("mospassword"))>0:
+                        self.mos_client.username_pw_set(self._db.get_value("mosusername"),self._db.get_value("mospassword"))
 
-		mos_broker_address = self._db.get_value("mosbrokeraddress") 
+                mos_broker_address = self._db.get_value("mosbrokeraddress") 
 
-               	self.app_log.info("Connecting to: " + mos_broker_address)
+                self.app_log.info("Connecting to: " + mos_broker_address)
 
-               	self.mos_client.connect(mos_broker_address, int(self._db.get_value("mosbrokerport")), 60)
+                self.mos_client.connect(mos_broker_address, int(self._db.get_value("mosbrokerport")), 60)
 
-               	self.app_log.info("Connected")
-               	self.mos_client.loop_start()
+                self.app_log.info("Connected")
+                self.mos_client.loop_start()
 
         def broadcast_send(self, data_item, value):
                 result = 0
@@ -135,11 +135,11 @@ class Sounds(object) :
                         self.app_log.exception('Exception: %s', e)
 
 
-	def process_loop(self):
-		x = 0
-		#Poll for state change of device, so we can keep the swiches updates with the status - in case another type of switch was used. 
-		while True:
-			time.sleep(SLEEP_TIME)
+        def process_loop(self):
+                x = 0
+                #Poll for state change of device, so we can keep the swiches updates with the status - in case another type of switch was used. 
+                while True:
+                        time.sleep(SLEEP_TIME)
 
 def run_program(main_app_log):
         Sounds(main_app_log)

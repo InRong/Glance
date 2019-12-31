@@ -36,49 +36,49 @@ import Audio
 SLEEP_TIME = 1
 
 class Automation(object) :
-	def __init__(self, main_app_log):
-		try:
-	                if main_app_log is None:
+        def __init__(self, main_app_log):
+                try:
+                        if main_app_log is None:
 
-        	                self.log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
+                                self.log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
 
-                	        self.logFile = 'logs/Automation.log'
+                                self.logFile = 'logs/Automation.log'
 
-	                        self.my_handler = RotatingFileHandler(self.logFile, mode='a', maxBytes=5*1024*1024, backupCount=1, encoding=None, delay=0)
-        	                self.my_handler.setFormatter(self.log_formatter)
-                	        self.my_handler.setLevel(logging.INFO)
+                                self.my_handler = RotatingFileHandler(self.logFile, mode='a', maxBytes=5*1024*1024, backupCount=1, encoding=None, delay=0)
+                                self.my_handler.setFormatter(self.log_formatter)
+                                self.my_handler.setLevel(logging.INFO)
 
-	                        self.app_log = logging.getLogger('root')
-        	                self.app_log.setLevel(logging.INFO)
+                                self.app_log = logging.getLogger('root')
+                                self.app_log.setLevel(logging.INFO)
 
-                	        self.app_log.addHandler(self.my_handler)
+                                self.app_log.addHandler(self.my_handler)
 
-	                else:
-        	                self.app_log = main_app_log
+                        else:
+                                self.app_log = main_app_log
 
-	                self.file_modified_time_at_last_read = time.time()
+                        self.file_modified_time_at_last_read = time.time()
 
-        	        self.motion_value = False
-	                self.last_pir_time = time.time()
-	        
-		        self.light_value = 0
-        	        self.last_light_message = ""
+                        self.motion_value = False
+                        self.last_pir_time = time.time()
+                
+                        self.light_value = 0
+                        self.last_light_message = ""
 
-	                self.temperature_value = 0
-        	        self.last_temperature_message = ""
+                        self.temperature_value = 0
+                        self.last_temperature_message = ""
 
-	                self.humidity_value = 0
-        	        self.last_humidity_message = ""
+                        self.humidity_value = 0
+                        self.last_humidity_message = ""
 
- 		        self.last_event = None
-        	        self.last_mins = 99
+                        self.last_event = None
+                        self.last_mins = 99
  
-			self.away = False
+                        self.away = False
 
-			self.db = DB.DB()
-			self.read_settings()
-			self.start_mosquitto()
-        	        self.publish_loop()
+                        self.db = DB.DB()
+                        self.read_settings()
+                        self.start_mosquitto()
+                        self.publish_loop()
 
                 except Exception as e:
                         self.app_log.exception('Exception: %s', e)
@@ -104,25 +104,25 @@ class Automation(object) :
                         self.app_log.exception('Exception: %s', e)
 
 
-	def on_connect(self, mosclient, userdata, flags, rc):
-		try:
-	        	self.app_log.info("Subscribing to topic: " + self.db.get_value("mostopic"))
-		        mosclient.subscribe(self.db.get_value("mostopic"))
+        def on_connect(self, mosclient, userdata, flags, rc):
+                try:
+                        self.app_log.info("Subscribing to topic: " + self.db.get_value("mostopic"))
+                        mosclient.subscribe(self.db.get_value("mostopic"))
                 except Exception as e:
                         self.app_log.exception('Exception: %s', e)
 
-	def on_message(self, mosclient, userdata, msg):
-		try:
-	               	message_parts = str(msg.payload).split("/")
-        	       	if len(message_parts)==3:
-				#Receive an incoming message and perform an action accordingly.
+        def on_message(self, mosclient, userdata, msg):
+                try:
+                        message_parts = str(msg.payload).split("/")
+                        if len(message_parts)==3:
+                                #Receive an incoming message and perform an action accordingly.
                                 incoming = message_parts[0] + "/" + message_parts[1] + "/"
-				self.app_log.info("Incoming - " + str(msg.payload))
+                                self.app_log.info("Incoming - " + str(msg.payload))
 
                                 if incoming == self.db.get_message("motionsensor"):
                                         self.motion_value = (message_parts[2] == "on") or (message_parts[2] == "+")
-       	                                if self.motion_value:
-               	                                self.trigger_action_on_motion()
+                                        if self.motion_value:
+                                                self.trigger_action_on_motion()
 
                                 #read the selected sensor data
                                 elif incoming == self.db.get_message("lightsensor"):
@@ -164,33 +164,33 @@ class Automation(object) :
                                                         self.last_humidity_message="humidityoff"
  
                                 elif message_parts[1] == "reboot":
-                                	if message_parts[0] == self.db.get_value("name"):
-                                        	os.system('reboot -f')
+                                        if message_parts[0] == self.db.get_value("name"):
+                                                os.system('reboot -f')
  
                                 elif "Set Away" in incoming:
-					self.away = (message_parts[2]=="on")
-					
+                                        self.away = (message_parts[2]=="on")
+                                        
                 except Exception as e:
                         self.app_log.exception('Exception: %s', e)
 
         def send_message_set(self, set_name):
                 Thread(target=Utils.send_messages,args=(self.db, self.mos_client, self.app_log, self.away, set_name,)).start()
 
-	def start_mosquitto(self):
-		try:
-	       		self.mos_client = mqtt.Client()
-        	       	self.mos_client.on_connect = self.on_connect
-               		self.mos_client.on_message = self.on_message
+        def start_mosquitto(self):
+                try:
+                        self.mos_client = mqtt.Client()
+                        self.mos_client.on_connect = self.on_connect
+                        self.mos_client.on_message = self.on_message
 
-	               	if len(self.db.get_value("mospassword"))>0:
-        	        	self.mos_client.username_pw_set(self.db.get_value("mosusername"),self.db.get_value("mospassword"))
+                        if len(self.db.get_value("mospassword"))>0:
+                                self.mos_client.username_pw_set(self.db.get_value("mosusername"),self.db.get_value("mospassword"))
 
-	               	logging.info("Connecting to: " + self.db.get_value("mosbrokeraddress"))
+                        logging.info("Connecting to: " + self.db.get_value("mosbrokeraddress"))
 
-        	       	self.mos_client.connect(self.db.get_value("mosbrokeraddress"), int(self.db.get_value("mosbrokerport")), 60)
+                        self.mos_client.connect(self.db.get_value("mosbrokeraddress"), int(self.db.get_value("mosbrokerport")), 60)
 
-	               	logging.info("Connected")
-        	       	self.mos_client.loop_start()
+                        logging.info("Connected")
+                        self.mos_client.loop_start()
                 except Exception as e:
                         self.app_log.exception('Exception: %s', e)
 
@@ -212,31 +212,31 @@ class Automation(object) :
                 except Exception as e:
                         self.app_log.exception('Exception: %s', e)
 
-	def publish_loop(self):
-		while(1):
-			try:
-				self.read_settings()
+        def publish_loop(self):
+                while(1):
+                        try:
+                                self.read_settings()
 
-        	                if (self.last_mins <> Utils.get_mins()): #check once a minute
-                	                self.last_mins = Utils.get_mins()
+                                if (self.last_mins != Utils.get_mins()): #check once a minute
+                                        self.last_mins = Utils.get_mins()
 
-	                                event_list = Event.EventList()
-        	                        next_event = event_list.get_next_event(self.db)
+                                        event_list = Event.EventList()
+                                        next_event = event_list.get_next_event(self.db)
 
-	                                if next_event.get_mins_until_event()==0: #then the event is now.
-        	                                self.app_log.info("time for event")
-                	                        self.app_log.info(next_event.name + "on")
-			                        self.send_message_set(next_event.name + "on")
-                                	        self.last_event = next_event
+                                        if next_event.get_mins_until_event()==0: #then the event is now.
+                                                self.app_log.info("time for event")
+                                                self.app_log.info(next_event.name + "on")
+                                                self.send_message_set(next_event.name + "on")
+                                                self.last_event = next_event
 
-				pass
-        	        except Exception as e:
-                	        self.app_log.exception('Exception: %s', e)
-			finally:
-				time.sleep(SLEEP_TIME)
+                                pass
+                        except Exception as e:
+                                self.app_log.exception('Exception: %s', e)
+                        finally:
+                                time.sleep(SLEEP_TIME)
 
 def run_program(main_app_log):
-	Automation(main_app_log)
+        Automation(main_app_log)
 
 if __name__ == '__main__':
         run_program(None)

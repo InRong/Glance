@@ -31,8 +31,8 @@ import json
 SLEEP_TIME = 5
 
 commands = {
-	'on'       : '{"on":true}',
-	'off'      : '{"on":false}',
+        'on'       : '{"on":true}',
+        'off'      : '{"on":false}',
 }
 
 class HUE(object) :
@@ -57,53 +57,53 @@ class HUE(object) :
                 else:
                         self.app_log = main_app_log
 
-		self._db = DB.DB()
-		self._db.load_settings()
-		self.start_mos()
-		self.process_loop()
+                self._db = DB.DB()
+                self._db.load_settings()
+                self.start_mos()
+                self.process_loop()
 
-	def on_connect(self, mosclient, userdata, flags, rc):
-               	self.app_log.info("Subscribing to topic: " + self._db.get_value("mostopic"))
-               	mosclient.subscribe(self._db.get_value("mostopic"))
+        def on_connect(self, mosclient, userdata, flags, rc):
+                self.app_log.info("Subscribing to topic: " + self._db.get_value("mostopic"))
+                mosclient.subscribe(self._db.get_value("mostopic"))
 
-	def send_command(self, user, in_ip, light, in_cmd):
-		message = "http://" + in_ip + "/api/" + user + "/lights/" + light  + "/state"
-		payload = commands[in_cmd]
-        	self.app_log.info("Sending put command to Hue hub - " + message)
-        	self.app_log.info("...with payload - " + payload)
+        def send_command(self, user, in_ip, light, in_cmd):
+                message = "http://" + in_ip + "/api/" + user + "/lights/" + light  + "/state"
+                payload = commands[in_cmd]
+                self.app_log.info("Sending put command to Hue hub - " + message)
+                self.app_log.info("...with payload - " + payload)
 
-		try:
-		        r = requests.put(message, data=payload)
-        		self.app_log.info(r.status_code)
-        		self.app_log.info(r.content)
+                try:
+                        r = requests.put(message, data=payload)
+                        self.app_log.info(r.status_code)
+                        self.app_log.info(r.content)
                 except Exception as e:
                         self.app_log.exception('Exception: %s', e)
 
-	def get_status(self, ip, light):
-		message = "http://" + ip + "/api/" + self._db.get_value("hueuser")  + "/lights/" + light
-		try:
-			r = requests.get(message)
-			data = r.json()
-			if data["state"]["reachable"]:
-				return data["state"]["on"]
-			else:
-				return -1 #Not reachable, so we do not know the state
+        def get_status(self, ip, light):
+                message = "http://" + ip + "/api/" + self._db.get_value("hueuser")  + "/lights/" + light
+                try:
+                        r = requests.get(message)
+                        data = r.json()
+                        if data["state"]["reachable"]:
+                                return data["state"]["on"]
+                        else:
+                                return -1 #Not reachable, so we do not know the state
 
                 except Exception as e:
                         self.app_log.exception('Exception: %s', e)
 
-	def on_message(self, mosclient, userdata, msg):
-               	messageparts = str(msg.payload).split("/")
-               	if len(messageparts)==3 and messageparts[1] == "HUE":
-			full_command =  messageparts[2]
-			commd = full_command[-1]
-			light = full_command[-2][:1]
-			ip =  full_command[0:len(messageparts[2])-1]
-			self.app_log.info(ip + " - " + full_command)
-			if commd == "+":
-				self.send_command(self._db.get_value("hueuser"), self._db.get_value("huehubip"), light, "on")
-			elif commd == "-":
-				self.send_command(self._db.get_value("hueuser"), self._db.get_value("huehubip"), light, "off")
+        def on_message(self, mosclient, userdata, msg):
+                messageparts = str(msg.payload).split("/")
+                if len(messageparts)==3 and messageparts[1] == "HUE":
+                        full_command =  messageparts[2]
+                        commd = full_command[-1]
+                        light = full_command[-2][:1]
+                        ip =  full_command[0:len(messageparts[2])-1]
+                        self.app_log.info(ip + " - " + full_command)
+                        if commd == "+":
+                                self.send_command(self._db.get_value("hueuser"), self._db.get_value("huehubip"), light, "on")
+                        elif commd == "-":
+                                self.send_command(self._db.get_value("hueuser"), self._db.get_value("huehubip"), light, "off")
 
         def on_disconnect(client, userdata, rc):
             if rc != 0:
@@ -118,24 +118,24 @@ class HUE(object) :
                 self.mos_client.on_disconnect = self.on_disconnect
                 self.mos_client.on_publish = self.on_publish
 
-	def start_mos(self):
-       		self.mos_client = mqtt.Client()
-               	self.mos_client.on_connect = self.on_connect
-               	self.mos_client.on_message = self.on_message
+        def start_mos(self):
+                self.mos_client = mqtt.Client()
+                self.mos_client.on_connect = self.on_connect
+                self.mos_client.on_message = self.on_message
                 self.mos_client.on_disconnect = self.on_disconnect
                 self.mos_client.on_publish = self.on_publish
 
-               	if len(self._db.get_value("mospassword"))>0:
-                	self.mos_client.username_pw_set(self._db.get_value("mosusername"),self._db.get_value("mospassword"))
+                if len(self._db.get_value("mospassword"))>0:
+                        self.mos_client.username_pw_set(self._db.get_value("mosusername"),self._db.get_value("mospassword"))
 
-		mos_broker_address = self._db.get_value("mosbrokeraddress") 
+                mos_broker_address = self._db.get_value("mosbrokeraddress") 
 
-               	self.app_log.info("Connecting to: " + mos_broker_address)
+                self.app_log.info("Connecting to: " + mos_broker_address)
 
-               	self.mos_client.connect(mos_broker_address, int(self._db.get_value("mosbrokerport")), 60)
+                self.mos_client.connect(mos_broker_address, int(self._db.get_value("mosbrokerport")), 60)
 
-               	self.app_log.info("Connected")
-               	self.mos_client.loop_start()
+                self.app_log.info("Connected")
+                self.mos_client.loop_start()
 
         def broadcast_send(self, data_item, value):
                 result = 0
@@ -163,35 +163,35 @@ class HUE(object) :
                 except Exception as e:
                         self.app_log.exception('Exception: %s', e)
 
-	def process_loop(self):
-		light = 1
+        def process_loop(self):
+                light = 1
 
-		ip = self._db.get_value("huehubip")
+                ip = self._db.get_value("huehubip")
 
-		while True:
-			value = ""
+                while True:
+                        value = ""
 
-			try:
-				value = self.get_status(ip, str(light))
-	                except Exception as e:
-                	        self.app_log.exception('Exception: %s', e)
+                        try:
+                                value = self.get_status(ip, str(light))
+                        except Exception as e:
+                                self.app_log.exception('Exception: %s', e)
 
-			#share the status of the light
-			if value!= -1: #-1 is not reachable. 
-				if value:
-					self.broadcast_send("HUE_STATE", ip + "-" + str(light) + "+")
-					self.app_log.info("sending message - " + "HUE_STATE" + ip + "-" + str(light) + "+")
-				else:
-					self.broadcast_send("HUE_STATE", ip + "-" + str(light) + "-")
-					self.app_log.info("sending message - " + "HUE_STATE" + ip + "-" + str(light) + "-")
-				
-			#we look at the status of two lights. Need to extend if more lights required. 
-			if light ==1:
-				light = 2
-			else:
-				light = 1
+                        #share the status of the light
+                        if value!= -1: #-1 is not reachable. 
+                                if value:
+                                        self.broadcast_send("HUE_STATE", ip + "-" + str(light) + "+")
+                                        self.app_log.info("sending message - " + "HUE_STATE" + ip + "-" + str(light) + "+")
+                                else:
+                                        self.broadcast_send("HUE_STATE", ip + "-" + str(light) + "-")
+                                        self.app_log.info("sending message - " + "HUE_STATE" + ip + "-" + str(light) + "-")
+                                
+                        #we look at the status of two lights. Need to extend if more lights required. 
+                        if light ==1:
+                                light = 2
+                        else:
+                                light = 1
 
-			time.sleep(SLEEP_TIME)
+                        time.sleep(SLEEP_TIME)
 
 def run_program(main_app_log):
         HUE(main_app_log)

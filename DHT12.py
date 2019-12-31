@@ -51,10 +51,10 @@ class DHT12(object):
                 else:
                         self.app_log = main_app_log
 
-		self._device = 0x5c
-		self._bus = smbus.SMBus(1)
-		self._temperature = ""
-		self._humidity = ""
+                self._device = 0x5c
+                self._bus = smbus.SMBus(1)
+                self._temperature = ""
+                self._humidity = ""
 
                 self._db = DB.DB()
                 self._db.load_settings()
@@ -63,30 +63,30 @@ class DHT12(object):
                 self.process_loop()
 
 
-	def get(self):
-      		data = self._bus.read_i2c_block_data(self._device, 0x00, 5)
+        def get(self):
+                data = self._bus.read_i2c_block_data(self._device, 0x00, 5)
 
-       		if data[0] + data[1] + data[2] + data[3] == data[4]:
+                if data[0] + data[1] + data[2] + data[3] == data[4]:
 
- 			if data[3] > 4: #needs rounding up
-		       		self._temperature = str(data[2] + 1)
-			else:
-	       			self._temperature = str(data[2])
+                        if data[3] > 4: #needs rounding up
+                                self._temperature = str(data[2] + 1)
+                        else:
+                                self._temperature = str(data[2])
 
- 			if data[1] > 4: #needs rounding up
-				self._humidity = str(data[0] + 1)
-			else:
-				self._humidity = str(data[0])
-		else:
-			self._temperature = ""
-			self._humidity = ""
+                        if data[1] > 4: #needs rounding up
+                                self._humidity = str(data[0] + 1)
+                        else:
+                                self._humidity = str(data[0])
+                else:
+                        self._temperature = ""
+                        self._humidity = ""
 
-	def get_units(self, which_units):
-		if which_units == "temperature":
-			return (u'\N{DEGREE SIGN}' + 'C')
+        def get_units(self, which_units):
+                if which_units == "temperature":
+                        return ('\N{DEGREE SIGN}' + 'C')
 
-		if which_units == "humidity":
-			return ("%")
+                if which_units == "humidity":
+                        return ("%")
 
 
         def on_connect(self, mosclient, userdata, flags, rc):
@@ -118,7 +118,7 @@ class DHT12(object):
                 self.app_log.info("Connected")
                 self.mos_client.loop_start()
 
-	def broadcast_send(self, data_item, value):
+        def broadcast_send(self, data_item, value):
                 result = 0
                 mid = 0
 
@@ -145,20 +145,20 @@ class DHT12(object):
                         self.app_log.exception('Exception: %s', e)
 
 
-	def process_loop(self):
-		while(1):
-			try:
-				self.get()
-				if len(self._temperature)>0:
-					message = "Inside: " + self._temperature  + self.get_units("temperature") + " " +  self._humidity + self.get_units("humidity")
-					self.broadcast_send("DHT Temp and Hum", message)
+        def process_loop(self):
+                while(1):
+                        try:
+                                self.get()
+                                if len(self._temperature)>0:
+                                        message = "Inside: " + self._temperature  + self.get_units("temperature") + " " +  self._humidity + self.get_units("humidity")
+                                        self.broadcast_send("DHT Temp and Hum", message)
                         except Exception as e:
                                 self.app_log.exception('Exception: %s', e)
-			finally: 
-				time.sleep(SLEEP_TIME)
+                        finally: 
+                                time.sleep(SLEEP_TIME)
 
 def run_program(main_app_log):
         DHT12(main_app_log)
 
 if __name__ == "__main__":
-	run_program(None)
+        run_program(None)

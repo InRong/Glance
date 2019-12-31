@@ -20,7 +20,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import urllib2, urllib, json
+import urllib.request, urllib.error, urllib.parse, urllib.request, urllib.parse, urllib.error, json
 import time
 import datetime
 import feedparser
@@ -56,19 +56,19 @@ class UKWeather(object):
                 self.days=3
                 self._humidity=[[] for _ in range(self.days)]
                 self._temp=[[] for _ in range(self.days)]
-		self._day=[[] for _ in range(self.days)]
-		self._wind=[[] for _ in range(self.days)]
-		self._sun=[[] for _ in range(self.days)]
-		self._rise=[[] for _ in range(self.days)]
-		self._set=[[] for _ in range(self.days)]
+                self._day=[[] for _ in range(self.days)]
+                self._wind=[[] for _ in range(self.days)]
+                self._sun=[[] for _ in range(self.days)]
+                self._rise=[[] for _ in range(self.days)]
+                self._set=[[] for _ in range(self.days)]
                 for day in range(self.days):
-		   self._humidity[day] = ""
-		   self._temp[day] = ""
-		   self._day[day] = ""
-		   self._wind[day] = ""
-		   self._sun[day] = ""
-		   self._rise[day] = ""
-		   self._set[day] = ""
+                   self._humidity[day] = ""
+                   self._temp[day] = ""
+                   self._day[day] = ""
+                   self._wind[day] = ""
+                   self._sun[day] = ""
+                   self._rise[day] = ""
+                   self._set[day] = ""
 
                 self._db = DB.DB()
                 self._db.load_settings()
@@ -76,30 +76,30 @@ class UKWeather(object):
                 self.start_mos()
                 self.process_loop()
 
-	def get(self):
+        def get(self):
                 for day in range(self.days):
-		   self._humidity[day] = ""
-		   self._temp[day] = ""
-		   self._day[day] = ""
-		   self._wind[day] = ""
-		   self._sun[day] = ""
-		   self._rise[day] = ""
-		   self._set[day] = ""
+                   self._humidity[day] = ""
+                   self._temp[day] = ""
+                   self._day[day] = ""
+                   self._wind[day] = ""
+                   self._sun[day] = ""
+                   self._rise[day] = ""
+                   self._set[day] = ""
 
-		targeturl = 'https://weather-broker-cdn.api.bbci.co.uk/en/forecast/rss/3day/2649660'
+                targeturl = 'https://weather-broker-cdn.api.bbci.co.uk/en/forecast/rss/3day/2649660'
 
-		d = feedparser.parse(targeturl) 
+                d = feedparser.parse(targeturl) 
 
-		if len(d.entries) > 0:
+                if len(d.entries) > 0:
                     results=len(d.entries)
                     if (self.days<results):
                         results = self.days   # Use the lowest of #results or number of storage locations...
                     for day in range(results):
-			desc =  d.entries[day].title
+                        desc =  d.entries[day].title
                         desc = desc.replace("Maximum","Max").replace("Minimum","Min").replace("Temperature","Temp")
-			self._day[day] =  desc
-			desc =  d.entries[day].summary_detail.value.split(', ')
-			for item in desc:
+                        self._day[day] =  desc
+                        desc =  d.entries[day].summary_detail.value.split(', ')
+                        for item in desc:
                             pair = item.split(": ") 
                             if pair[0] == "Wind Direction":
                                 self._wind[day] = pair[1]
@@ -118,19 +118,19 @@ class UKWeather(object):
                             #if pair[0] == "UV Risk":
                             #    self._uv[day] = pair[1]
 
-			logging.info(self._humidity[0])
-			logging.info(self._day[0])
+                        logging.info(self._humidity[0])
+                        logging.info(self._day[0])
                     if (len(self._rise[0]) == 0):
                         self._rise[0] = self._rise[1]
-		else:
-			logging.info("No entries returned")
+                else:
+                        logging.info("No entries returned")
 
-	def getunits(self, which_units):
-		if which_units == "temperature":
-			return (u'\N{DEGREE SIGN}' + 'C')
+        def getunits(self, which_units):
+                if which_units == "temperature":
+                        return ('\N{DEGREE SIGN}' + 'C')
 
-		if which_units == "humidity":
-			return ("%")
+                if which_units == "humidity":
+                        return ("%")
 
         def on_connect(self, mosclient, userdata, flags, rc):
                 self.app_log.info("Subscribing to topic: " + self._db.get_value("mostopic"))
@@ -165,20 +165,20 @@ class UKWeather(object):
                       logging.exception('Exception: %s', e)
 
 
-	def process_loop(self):
-		max = 60
-		x = max
-		while(1):
-			try:
-				#Data is refreshed every 60 minutes
-				if x == max:
-					x = 0
-					self.get()
-				else:
-					x = x + 1
+        def process_loop(self):
+                max = 60
+                x = max
+                while(1):
+                        try:
+                                #Data is refreshed every 60 minutes
+                                if x == max:
+                                        x = 0
+                                        self.get()
+                                else:
+                                        x = x + 1
 
-				#This is broadcast every minute, if valid
-				if len(self._day[0]) > 0:
+                                #This is broadcast every minute, if valid
+                                if len(self._day[0]) > 0:
                                         message = self._db.get_value("name") + "/UK Weather Summary/" + self._day[x%self.days]
                                         self.publish_data(message)
                                         message = self._db.get_value("name") + "/UK Weather Humidity/" + self._humidity[0]
@@ -206,15 +206,15 @@ class UKWeather(object):
                                              self.publish_data(message)
                                 else:
                                         self.app_log.info("Nothing Sent")
-			except Exception as e:
-                        	logging.exception('Exception: %s', e)
-			finally:
-				time.sleep(SLEEP_TIME)
+                        except Exception as e:
+                                logging.exception('Exception: %s', e)
+                        finally:
+                                time.sleep(SLEEP_TIME)
 
 
 def run_program(main_app_log):
-	UKWeather(main_app_log)
+        UKWeather(main_app_log)
 
 if __name__ == '__main__':
-	run_program(None)
+        run_program(None)
 
