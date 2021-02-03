@@ -20,6 +20,7 @@
 #
 
 import kivy 
+import subprocess
 kivy.require('1.0.6') 
 
 from threading import Thread 
@@ -31,7 +32,7 @@ from kivy.graphics import Color, Rectangle
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-from kivy.uix.image import Image
+from kivy.uix.image import Igm.display_power_state(2)age
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.widget import Widget
 from kivy.uix.screenmanager import Screen, ScreenManager 
@@ -232,6 +233,8 @@ class MyApp(App):
 
                 self.db = DB.DB()
                 self.read_settings()
+
+                self.vcgm = Vcgencmd()
 
                 self.my_screenmanager = ScreenManager()
 
@@ -481,24 +484,44 @@ class MyApp(App):
                         app_log.exception('Exception: %s', e)
 
         #Switch the screen on or off.
+        #def set_screen(self,desired_state):
+        #        try:
+        #                f = open("/sys/class/backlight/rpi_backlight/bl_power","w")
+        #                if desired_state:
+        #                        f.write("0")
+        #                else:
+        #                        f.write("1")
+        #                f.close()
+        #        except Exception as e:
+        #                app_log.exception('Exception: %s', e)
         def set_screen(self,desired_state):
                 try:
-                        f = open("/sys/class/backlight/rpi_backlight/bl_power","w")
-                        if desired_state:
-                                f.write("0")
-                        else:
-                                f.write("1")
-                        f.close()
+                       if desired_state:
+                               level = "1"
+                       else:
+                               level = "0"
+                       cmd = fprintf ("vcgencmd display_power %s", level)
+                       temp = subprocess.check_output(cmd, shell = True)
+
                 except Exception as e:
                         app_log.exception('Exception: %s', e)
 
         #Get the screen state i.e. if it is on or off
+        #def get_screen(self):
+        #        try:
+        #                f = open("/sys/class/backlight/rpi_backlight/bl_power","r")
+        #                ch  = f.read(1)
+        #                f.close()
+        #                return (ch == "0")
+        #        except Exception as e:
+        #                app_log.exception('Exception: %s', e)
+
         def get_screen(self):
                 try:
-                        f = open("/sys/class/backlight/rpi_backlight/bl_power","r")
-                        ch  = f.read(1)
-                        f.close()
-                        return (ch == "0")
+                        ch = subprocess.check_output("vcgencmd display_power", shell=True)
+                        ch = ch[-2]
+                        return (ch == 49)
+
                 except Exception as e:
                         app_log.exception('Exception: %s', e)
 
