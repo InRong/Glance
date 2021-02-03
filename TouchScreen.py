@@ -32,7 +32,7 @@ from kivy.graphics import Color, Rectangle
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-from kivy.uix.image import Igm.display_power_state(2)age
+from kivy.uix.image import Image
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.widget import Widget
 from kivy.uix.screenmanager import Screen, ScreenManager 
@@ -233,8 +233,6 @@ class MyApp(App):
 
                 self.db = DB.DB()
                 self.read_settings()
-
-                self.vcgm = Vcgencmd()
 
                 self.my_screenmanager = ScreenManager()
 
