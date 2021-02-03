@@ -116,8 +116,8 @@ class Launcher(object):
         def sounds(self):
                 Sounds.run_program(self.app_log)
 
-        def transport(self):
-                Transport.run_program(self.app_log)
+#        def transport(self):
+#                Transport.run_program(self.app_log)
 
         def rpiio(self):
                 RPIIO.run_program(self.app_log)

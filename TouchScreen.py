@@ -498,7 +498,7 @@ class MyApp(App):
                                level = "1"
                        else:
                                level = "0"
-                       cmd = fprintf ("vcgencmd display_power %s", level)
+                       cmd = "vcgencmd display_power {}".format(level)
                        temp = subprocess.check_output(cmd, shell = True)
 
                 except Exception as e:
