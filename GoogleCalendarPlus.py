@@ -20,7 +20,7 @@
 # limitations under the License.
 #
 #
-# Enhancements (C) 2018 by Alan Wood
+# Enhancements (C) 2018,2020,2021 by Alan Wood
 #
 #  Extended to allow access to sub calendars.
 #  Primary calendar is always delivered via the Calendar tag as per the base version.
@@ -37,7 +37,15 @@
 #  This will allow the first entry for this sub calendar to be selected in the settings
 #  webpages under the tag "MS Calendar entry 1"
 #
-#  Sub calendars support combined 1&2 entries in the same way as the standard module.
+#  Added the option of combining multiple Calendars into a single entry.
+#   Any Calendar other than the primary one can be added to the multi Calendar, and
+#   the top 5 from the whole list will be published.
+#  To add a Calendar to the multi list, add a DB entry, CalendarxMulti=1
+#  Optionally, add an entry MultiCalendarTag can be used to add a prefix to the multi
+#  Calendar. At this point, there can be only 1 multi Calendar
+#
+#  Sub calendars support combined 1&2 entries in the same way as the standard module
+#   for all single Calendars, but not for the multi.
 #
 
 import httplib2
@@ -83,7 +91,7 @@ class Calendar(object):
 
                         self.log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
 
-                        self.logFile = 'logs/GoogleCalendarPlus.log'
+                        self.logFile = 'logs/GoogleCalendarPlus2.log'
 
                         self.my_handler = RotatingFileHandler(self.logFile, mode='a', maxBytes=5*1024*1024, backupCount=1, encoding=None, delay=0)
                         self.my_handler.setFormatter(self.log_formatter)
@@ -110,20 +118,30 @@ class Calendar(object):
                 x = 1
                 self.cals={}
                 self.calsPref={}
+                self.multiCals=[]
+                self.multCalTag=''
                 nextCal="Calendar"+str(x)
                 while (self._db.get_value(nextCal)):
                   NextCalTag=nextCal+'Tag'
                   NextCalPrefix=nextCal+'Prefix'
+                  NextCalMulti=nextCal+'Multi'
+                  #print ('Checking: '+NextCalMulti )
                   #print (NextCalTag);
                   #print (NextCalPrefix);
                   if self._db.get_value(NextCalTag):
                      self.cals[self._db.get_value(nextCal)]=self._db.get_value(NextCalTag)
                      if self._db.get_value(NextCalTag):
                         self.calsPref[self._db.get_value(NextCalTag)]=self._db.get_value(NextCalPrefix)
+                     if self._db.get_value(NextCalMulti) != None:
+                        #if self._db.get_value(NextCalMulti) == 1:     
+                        self.multiCals.append(self._db.get_value(nextCal))
+                  if self._db.get_value('MultiCalendarTag'):
+                     self.multCalTag=self._db.get_value('MultiCalendarTag')
                   x = x + 1
                   nextCal="Calendar"+str(x)
                 #pprint (self.cals)
                 #pprint (self.calsPref)
+                #print (self.multiCals)
 
                 self.start_mosquito()
                 self.process_loop()
@@ -131,6 +149,8 @@ class Calendar(object):
         def on_connect(self, mosclient, userdata, flags, rc):
                 self.app_log.info("Subscribing to topic: " + self._db.get_value("mostopic"))
                 mosclient.subscribe(self._db.get_value("mostopic"))
+                #self.app_log.info("Subscribing to topic: " + 'alan_test')
+                #mosclient.subscribe('alan_test')
 
         def on_disconnect(self, client, userdata, rc):
             if rc != 0:
@@ -174,6 +194,7 @@ class Calendar(object):
                 try:
                         message =  self._db.get_value("name") + "/" + data_item + "/"  + value
                         result, mid = self.mos_client.publish(self._db.get_value("mostopic"), message)
+                        # result, mid = self.mos_client.publish('alan_test', message)
                         if result == mqtt.MQTT_ERR_SUCCESS:
                                 self.app_log.info("published OK, Message ID = " + str(mid))
                         elif result == mqtt.MQTT_ERR_NO_CONN:
@@ -234,6 +255,8 @@ class Calendar(object):
             now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
 
             page_token = None
+            multiCal={}
+
             while True:
               calendar_list = service.calendarList().list(pageToken=page_token).execute()
               for calendar_list_entry in calendar_list['items']:
@@ -253,9 +276,13 @@ class Calendar(object):
                     calendarId=CalId, timeMin=now, maxResults=5, singleEvents=True,
                     orderBy='startTime').execute()
                   events = eventsResult.get('items', [])
-                  x = 1                         
+                  x = 1
+                                           
                   if not events:
                       self.app_log.info('No upcoming events found.')
+                  else:
+                      if (calendar_list_entry['summary'] in self.multiCals):
+                        multiCal[calendar_list_entry['summary']]=[] 
                   for event in events:
                       start = event['start'].get('dateTime', event['start'].get('date'))
                       next_event = self.process_text(start, event['summary'])
@@ -263,6 +290,12 @@ class Calendar(object):
                          next_event = self.calsPref[ThisCal]+next_event
                       self.broadcast_send(ThisCal + str(x), next_event)
  
+                      # If this CalNum is a multiCal entry, then store the events
+                      # ???? Need to keep the CalNum, and only check the earliest for each calendar
+                      # Not possible with this method, lets store it better.......  
+                      if (calendar_list_entry['summary'] in self.multiCals):      
+                        multiCal[calendar_list_entry['summary']].append({'start' : start, 'summary' : event['summary']})
+
                       if x == 1:
                               next_two_events = next_event
                       elif x == 2:
@@ -271,14 +304,32 @@ class Calendar(object):
 
                       x = x + 1
 
+                         
               page_token = calendar_list.get('nextPageToken')
               if not page_token:
                 break
 
+            for order in [1,2,3,4,5]:
+                earliest=0
+                # print (multiCal)
+                for Calendar in multiCal:
+                  if ('start' in multiCal[Calendar][0]):
+                    if (earliest == 0) or (multiCal[Calendar][0]['start'] < earliest):
+                        #print (multiCal[Calendar][0])    
+                        earliest=multiCal[Calendar][0]['start']
+                        earliestCal=Calendar
+                # Grab earliest, send it with the token, then delete it from mutlical
+                # 
+                # event = self.process_text(start, event['summary'])
+                mevent = self.process_text(multiCal[earliestCal][0]['start'], multiCal[earliestCal][0]['summary'])
+                mevent = self.multCalTag + mevent
+                self.broadcast_send('MultiCal' + str(order), mevent)
+                del multiCal[earliestCal][0]
+                
             self.app_log.info('Getting the upcoming 5 events')
 
             #eventsResult = service.events().list(
-                #calendarId='primary', timeMin=now, maxResults=5, singleEvents=True,
+                #calendarId='primary', timeMin=now, maxResults=5, singleEvents=True,2
                 #orderBy='startTime').execute()
             #events = eventsResult.get('items', [])
 
@@ -323,6 +374,9 @@ class Calendar(object):
 
             out_text = out_text + " " + summary
             #out_text = out_text + " " + prefix + summary
+
+            #Replace any / in the text with a , as / is a spearator in the display unit
+            out_text = out_text.replace("/",",")
 
             return out_text     
 
