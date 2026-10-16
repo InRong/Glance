@@ -192,7 +192,7 @@ class UKWeather(object):
                                         for day in range(self.days):
                                              message = self._db.get_value("name") + "/UK Weather Summary" + str(day) +"/" + self._day[day]
                                              self.publish_data(message)
-                                             message = self._db.get_value("name") + "/UK Weather Huimidity" + str(day) +"/" + self._humidity[day]
+                                             message = self._db.get_value("name") + "/UK Weather Humidity" + str(day) +"/" + self._humidity[day]
                                              self.publish_data(message)
                                              message = self._db.get_value("name") + "/UK Weather Wind" + str(day) +"/" + self._wind[day]
                                              self.publish_data(message)

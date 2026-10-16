@@ -30,7 +30,9 @@ from logging.handlers import RotatingFileHandler
 #import DB
 
 import TouchScreen
-import GoogleCalendarPlus
+#  Stopped Calendar from starting with the rest so I could stop and start it separately while developing it. 
+#  Uncomment again if you want it to start with the rest of the code
+#import GoogleCalendarPlus
 #import SensorBoard
 #import SensorBoard2
 #import GY30
@@ -43,7 +45,7 @@ import GoogleCalendarPlus
 import Sounds
 import Automation
 
-import YahooWeather
+#import YahooWeather
 import UKWeather
 import RPIIO
 

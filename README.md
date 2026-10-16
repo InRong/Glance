@@ -7,12 +7,16 @@
 
 Installation Instructions
 
-1.	Download the latest Kivypie  and install to SD card. Insert into RPI, connect to the network and powerup! 
+1.	Download the latest RaspberryPi OS  and install to SD card. Insert into RPI, connect to the network and powerup! 
 
 2.	Upgrade to latest versions of the packages
 
 sudo apt-get update 
 sudo apt-get dist-upgrade -y
+
+Install Kivy
+sudo apt-get install kivy
+(more??) 
 
 Then test Kivy is working OK - run the simple example from https://kivy.org/#home 
 
@@ -94,7 +98,7 @@ b)	Install web pages and database
 
 cd /var/www/html/
 
-sudo git clone https://github.com/peterjhk1/GlanceWeb.git
+sudo git clone https://github.com/InRong/GlanceWeb.git
 
 7.	Configure the Raspberry Pi
 sudo raspi-config 

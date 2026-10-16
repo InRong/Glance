@@ -54,6 +54,12 @@ main_application = None
 app_log = None
 
 class DataLabel(Label):
+        id: str
+
+        def __init__(self, id:str, **kwargs):
+            self.id=id
+            super().__init__(**kwargs)
+            
         def update(self, dt):
                 if self.id=="35":
                         if (Utils.is_odd_seconds() or main_application.db.get_value('flashingtime') == "off"):
@@ -122,12 +128,14 @@ class MainScreen(Screen):
 
                 super (MainScreen, self).__init__(**kwargs)
 
-                layout = FloatLayout(size=(800, 600))
+                # layout = FloatLayout(size=(800, 600))
+                layout = FloatLayout(size=(1024, 600))
 
                 #Set up the screen labels - create them, setting the font, colour, position and size from the database. 
                 for label_loop in range(1, 12):
                         label_values = main_application.db.get_value("label" + str(label_loop)).split("^")
                         data_label[label_loop] = DataLabel(id=str(label_loop), font_size=label_values[0], pos_hint={'x':float(label_values[1]), 'y':float(label_values[2])})
+                        # data_label[label_loop] = DataLabel(font_size=label_values[0], pos_hint={'x':float(label_values[1]), 'y':float(label_values[2])})
                         data_label[label_loop].color = [float(label_values[3]),float(label_values[4]),float(label_values[5]),float(label_values[6])]
                         Clock.schedule_interval(data_label[label_loop].update, float(label_values[7]))
 
@@ -158,9 +166,11 @@ class MainScreen(Screen):
                         button_type = main_application.db.get_value("button" + str_btn_loop  + "type")
                         if len(alias)>0:
                                 if button_type == "button":
-                                        main_application.settings_buttons[btn_loop] = MyButton(id=str_btn_loop, text=alias ,size_hint=(button_size, 0.1), pos_hint={'x':0.01 + (btn_loop * button_position), 'y':0.02})
+                                        # main_application.settings_buttons[btn_loop] = MyButton(id=str_btn_loop, text=alias ,size_hint=(button_size, 0.1), pos_hint={'x':0.01 + (btn_loop * button_position), 'y':0.02})
+                                        main_application.settings_buttons[btn_loop] = MyButton(text=alias ,size_hint=(button_size, 0.1), pos_hint={'x':0.01 + (btn_loop * button_position), 'y':0.02})
                                 else:
-                                        main_application.settings_buttons[btn_loop] = MyToggleButton(id=str_btn_loop, text=alias ,size_hint=(button_size, 0.1), pos_hint={'x':0.01 + (btn_loop * button_position), 'y':0.02})
+                                        # main_application.settings_buttons[btn_loop] = MyToggleButton(id=str_btn_loop, text=alias ,size_hint=(button_size, 0.1), pos_hint={'x':0.01 + (btn_loop * button_position), 'y':0.02})
+                                        main_application.settings_buttons[btn_loop] = MyToggleButton(text=alias ,size_hint=(button_size, 0.1), pos_hint={'x':0.01 + (btn_loop * button_position), 'y':0.02})
 
                                 main_application.settings_buttons[btn_loop].bind(on_press=main_application.settings_buttons[btn_loop].callback)
                                 layout.add_widget(main_application.settings_buttons[btn_loop])
