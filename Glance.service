@@ -1,0 +1,13 @@
+[Unit]
+Description=Glance Display
+After=network.target
+Wants=network.target
+IgnoreOnIsolate=true
+
+[Service]
+ExecStart=python3 /home/pi/Glance/launcher.py
+Restart=always
+Type=exec
+
+[Install]
+WantedBy=multi-user.target

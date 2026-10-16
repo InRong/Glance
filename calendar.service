@@ -1,0 +1,13 @@
+[Unit]
+Description=Glance Google calendar
+After=network.target
+Wants=network.target
+IgnoreOnIsolate=true
+
+[Service]
+ExecStart=/home/pi/Glance/start_Glance.sh GoogleCalendarPlus venv
+Restart=always
+Type=exec
+
+[Install]
+WantedBy=multi-user.target
